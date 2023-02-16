@@ -1,0 +1,93 @@
+<html>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <head>
+        <title>Echo Transcript</title>
+        <!-- <link rel="stylesheet" href="./index.css"> -->
+        <meta property="og:url" content="https://skychen.com/echotranscript.html">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Echo Transcript">
+        <meta property="og:description" content="Echo Transcript - Play back what you speak, and transcript into text using the Web Speech API.">
+    </head>
+    <body>
+        <h1>Echo Transcript</h1>
+        <div id="container">
+            <div id="controls">
+                <button id="start-button">Start</button>
+                <button id="stop-button" disabled>Stop</button>
+                <button id="reset-button" class="reset">Reset</button>
+                <br />
+                <label for="languages">Language:</label>
+                <select name="languages" id="language-select">
+                    <option value="ar-SA">Arabic Saudi Arabia</option>
+                    <option value="cs-CZ">Czech Czech Republic</option>
+                    <option value="da-DK">Danish Denmark</option>
+                    <option value="de-DE">German Germany</option>
+                    <option value="el-GR">Modern Greek Greece</option>
+                    <option value="en-AU">English (Australia)</option>
+                    <option value="en-GB">English (United Kingdom)</option>
+                    <option value="en-IE">English (Ireland)</option>
+                    <option value="en-US" selected>English (United States)</option>
+                    <option value="en-ZA">English (South Africa)</option>
+                    <option value="es-ES">Spanish (Spain)</option>
+                    <option value="es-MX">Spanish (Mexico)</option>
+                    <option value="fi-FI">Finnish Finland</option>
+                    <option value="fr-CA">French (Canada)</option>
+                    <option value="fr-FR">French (France)</option>
+                    <option value="he-IL">Hebrew Israel</option>
+                    <option value="hi-IN">Hindi India</option>
+                    <option value="hu-HU">Hungarian Hungary</option>
+                    <option value="id-ID">Indonesian Indonesia</option>
+                    <option value="it-IT">Italian Italy</option>
+                    <option value="ja-JP">Japanese Japan</option>
+                    <option value="ko-KR">Korean Republic of Korea</option>
+                    <option value="nl-BE">Dutch Belgium</option>
+                    <option value="nl-NL">Dutch Netherlands</option>
+                    <option value="no-NO">Norwegian Norway</option>
+                    <option value="pl-PL">Polish Poland</option>
+                    <option value="pt-BR">Portuguese Brazil</option>
+                    <option value="pt-PT">Portuguese Portugal</option>
+                    <option value="ro-RO">Romanian Romania</option>
+                    <option value="ru-RU">Russian Russian Federation</option>
+                    <option value="sk-SK">Slovak Slovakia</option>
+                    <option value="sv-SE">Swedish Sweden</option>
+                    <option value="th-TH">Thai Thailand</option>
+                    <option value="tr-TR">Turkish Turkey</option>
+                    <option value="zh-CN">Chinese (China)</option>
+                    <option value="zh-HK">Chinese (Hong Kong)</option>
+                    <option value="zh-TW">Chinese (Taiwan)</option>
+                </select>
+                <br />
+                <label for="noise-canceling">Noise reduction level:</label>
+                <select name="noise-canceling" id="noise-canceling-select">
+                    <option value="0"></option>
+                    <option value="2000">Low</option>
+                    <option value="1500">Medium</option>
+                    <option value="500">High</option>
+                </select>
+                <div class="slider-container">
+                    <input type="range" min="0" max="179" value="0" class="slider" id="delay-slider">
+                    <br />
+                    <label for="delay-slider">Echo Delay value: <span id="delay-value">0</span></label>
+                </div>
+                <div class="slider-container">
+                    <input type="range" min="0" max="10" value="3" class="slider" id="volume-slider">
+                    <br />
+                    <label for="volume-slider">Echo Volume value: <span id="volume-value">3</span></label>
+                </div>
+            </div>
+            <div>
+                <pre id="transcript-div"></pre>
+            </div>
+        </div>
+        <!-- <script src="bundle.js"></script> -->
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-7Z21325S30"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-7Z21325S30');
+        </script>
+    </body>
+</html>
