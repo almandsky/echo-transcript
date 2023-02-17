@@ -224,7 +224,7 @@ stopButton.addEventListener('click', async function () {
         }
     });
 
-    context.close().then(() => {
+    context && context.close().then(() => {
         console.log('AudioContext is closed.');
         handleStop();
     });
