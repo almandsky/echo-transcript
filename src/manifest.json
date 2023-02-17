@@ -1,7 +1,7 @@
 {
     "name": "Echo Transcript",
     "short_name": "Echo Trans",
-    "start_url": "/index.html",
+    "start_url": "/",
     "display": "standalone",
     "icons": [
       {
