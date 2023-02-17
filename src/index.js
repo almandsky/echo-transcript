@@ -224,10 +224,15 @@ stopButton.addEventListener('click', async function () {
         }
     });
 
-    context && context.close().then(() => {
-        console.log('AudioContext is closed.');
+    if (context) {
+        context.close().then(() => {
+            console.log('AudioContext is closed.');
+            handleStop();
+        });
+    } else {
         handleStop();
-    });
+    }
+    
 
     if (wakeLockSupported) {
         wakeLock.release()
