@@ -91,7 +91,8 @@ startButton.addEventListener('click', async function () {
     playing = true;
     handleStart();
 
-    window.navigator.mediaDevices.getUserMedia({ audio: true })
+    if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
+        window.navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
             localStream = stream;
             if (recognition) {
@@ -102,6 +103,8 @@ startButton.addEventListener('click', async function () {
         .catch(error => {
             console.error(error);
         });
+    }
+    
 
     if (recognition) {
         recognition.onresult = function (event) {
@@ -215,16 +218,21 @@ stopButton.addEventListener('click', async function () {
         recognition.stop();
     }
 
-    localStream.getAudioTracks().forEach((audioTrack) => {
+    localStream && localStream.getAudioTracks().forEach((audioTrack) => {
         if (audioTrack) {
             audioTrack.stop();
         }
     });
 
-    context.close().then(() => {
-        console.log('AudioContext is closed.');
+    if (context) {
+        context.close().then(() => {
+            console.log('AudioContext is closed.');
+            handleStop();
+        });
+    } else {
         handleStop();
-    });
+    }
+    
 
     if (wakeLockSupported) {
         wakeLock.release()

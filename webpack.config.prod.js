@@ -61,7 +61,7 @@ module.exports = {
       runtimeCaching: [
         {
           urlPattern: /.*\.css/,
-          handler: 'CacheFirst',
+          handler: 'StaleWhileRevalidate',
           options: {
             cacheName: 'css-cache',
           },
@@ -82,7 +82,7 @@ module.exports = {
         },
         {
           urlPattern: /index\.html/,
-          handler: 'CacheFirst',
+          handler: 'StaleWhileRevalidate',
           options: {
             cacheName: 'html-cache',
           },

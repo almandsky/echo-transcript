@@ -46,28 +46,28 @@ module.exports = {
       runtimeCaching: [
         {
           urlPattern: /.*\.css/,
-          handler: 'CacheFirst',
+          handler: 'NetworkOnly',
           options: {
             cacheName: 'css-cache',
           },
         },
         {
           urlPattern: /\.(png|jpg|jpeg|svg|gif|ico)$/,
-          handler: 'CacheFirst',
+          handler: 'StaleWhileRevalidate',
           options: {
             cacheName: 'image-cache',
           },
         },
         {
           urlPattern: /.*\.js/,
-          handler: 'StaleWhileRevalidate',
+          handler: 'NetworkOnly',
           options: {
             cacheName: 'js-cache',
           },
         },
         {
           urlPattern: /index\.html/,
-          handler: 'CacheFirst',
+          handler: 'NetworkOnly',
           options: {
             cacheName: 'html-cache',
           },
