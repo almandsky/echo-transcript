@@ -3,6 +3,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const { GenerateSW } = require('workbox-webpack-plugin');
 
 process.env.NODE_ENV = "production";
 
@@ -49,8 +50,45 @@ module.exports = {
       patterns: [
         { from: "robots.txt", to: "robots.txt" },
         { from: "sitemap.xml", to: "sitemap.xml" },
+        { from: "src/images", to: "images" },
+        { from: "src/manifest.json", to: "manifest.json" },
       ],
-    })
+    }),
+    new GenerateSW({
+      clientsClaim: true,
+      skipWaiting: true,
+      swDest: 'sw.js',
+      runtimeCaching: [
+        {
+          urlPattern: /.*\.css/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'css-cache',
+          },
+        },
+        {
+          urlPattern: /\.(png|jpg|jpeg|svg|gif|ico)$/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'image-cache',
+          },
+        },
+        {
+          urlPattern: /.*\.js/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'js-cache',
+          },
+        },
+        {
+          urlPattern: /index\.html/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'html-cache',
+          },
+        },
+      ],
+    }),
   ],
   module: {
     rules: [
@@ -77,7 +115,6 @@ module.exports = {
               },
               sourceMap: true,
             },
-
           }
         ]
       }
