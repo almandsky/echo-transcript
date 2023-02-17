@@ -91,7 +91,7 @@ startButton.addEventListener('click', async function () {
     playing = true;
     handleStart();
 
-    window.navigator.mediaDevices.getUserMedia({ audio: true })
+    window.navigator?.mediaDevices?.getUserMedia({ audio: true })
         .then(stream => {
             localStream = stream;
             if (recognition) {
