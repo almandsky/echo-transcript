@@ -218,7 +218,7 @@ stopButton.addEventListener('click', async function () {
         recognition.stop();
     }
 
-    localStream.getAudioTracks().forEach((audioTrack) => {
+    localStream && localStream.getAudioTracks().forEach((audioTrack) => {
         if (audioTrack) {
             audioTrack.stop();
         }
