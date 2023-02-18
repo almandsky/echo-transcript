@@ -57,23 +57,18 @@
                     <option value="zh-HK">Chinese (Hong Kong)</option>
                     <option value="zh-TW">Chinese (Taiwan)</option>
                 </select>
-                <br />
-                <label for="noise-canceling">Noise reduction level:</label>
-                <select name="noise-canceling" id="noise-canceling-select">
-                    <option value="0"></option>
-                    <option value="2000">Low</option>
-                    <option value="1500">Medium</option>
-                    <option value="500">High</option>
-                </select>
-                <div class="slider-container">
-                    <input type="range" min="0" max="179" value="0" class="slider" id="delay-slider">
-                    <br />
-                    <label for="delay-slider">Echo Delay value: <span id="delay-value">0</span></label>
+                <div class="control-container">
+                    <label for="noise-canceling">Noise Suppression:</label>
+                    <input type="checkbox" id="noise-canceling-checkbox" name="noise-canceling" value="true" checked>
                 </div>
-                <div class="slider-container">
-                    <input type="range" min="0" max="10" value="3" class="slider" id="volume-slider">
+                <div class="control-container">
+                    <label for="auto-gain">Auto Gain Control:</label>
+                    <input type="checkbox" id="auto-gain-checkbox" name="auto-gain" value="true" checked>
+                </div>
+                <div class="control-container">
+                    <input type="range" min="0" max="10" value="1" class="slider" id="volume-slider">
                     <br />
-                    <label for="volume-slider">Echo Volume value: <span id="volume-value">3</span></label>
+                    <label for="volume-slider">Echo Volume value: <span id="volume-value">1</span></label>
                 </div>
             </div>
             <div>

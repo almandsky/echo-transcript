@@ -4,14 +4,10 @@ const startButton = document.querySelector('#start-button');
 const stopButton = document.querySelector('#stop-button');
 const resetButton = document.querySelector('#reset-button');
 const languageSelect = document.getElementById("language-select");
-const noiseCancelingSelect = document.getElementById("noise-canceling-select");
-const delaySlider = document.getElementById("delay-slider");
-const delaySliderOutput = document.getElementById("delay-value");
+const noiseCancelingCheckbox = document.getElementById("noise-canceling-checkbox");
+const autoGainCheckbox = document.getElementById("auto-gain-checkbox");
 const volumeSlider = document.getElementById("volume-slider");
 const volumeSliderOutput = document.getElementById("volume-value");
-delaySlider.oninput = function() {
-    delaySliderOutput.innerHTML = this.value;
-}
 
 volumeSlider.oninput = function() {
     volumeSliderOutput.innerHTML = this.value;
@@ -30,7 +26,8 @@ if (SpeechRecognition) {
 }
 
 let localStream;
-let noiseCanceling = 0;
+let noiseCanceling = true;
+let autoGainControl = true;
 
 let context;
 
@@ -55,9 +52,14 @@ languageSelect.addEventListener("change", function () {
     
 });
 
-languageSelect.addEventListener("change", function () {
-    const noiseCancelingValue = noiseCancelingSelect.options[noiseCancelingSelect.selectedIndex].value;
-    noiseCanceling = parseInt(noiseCancelingValue, 10);
+noiseCancelingCheckbox.addEventListener("change", function () {
+    const noiseCancelingValue = noiseCancelingCheckbox.checked;
+    noiseCanceling = noiseCancelingValue;
+});
+
+autoGainCheckbox.addEventListener("change", function () {
+    const autoGainValue = autoGainCheckbox.checked;
+    autoGainControl = autoGainValue;
 });
 
 resetButton.addEventListener("click", function () {
@@ -68,8 +70,8 @@ const handleStart = () => {
     startButton.setAttribute('disabled', true);
     resetButton.setAttribute('disabled', true);
     languageSelect.setAttribute('disabled', true);
-    noiseCancelingSelect.setAttribute('disabled', true);
-    delaySlider.setAttribute('disabled', true);
+    noiseCancelingCheckbox.setAttribute('disabled', true);
+    autoGainCheckbox.setAttribute('disabled', true);
     volumeSlider.setAttribute('disabled', true);
 
     stopButton.removeAttribute('disabled');
@@ -79,8 +81,8 @@ const handleStop = () => {
     startButton.removeAttribute('disabled');
     resetButton.removeAttribute('disabled');
     languageSelect.removeAttribute('disabled');
-    noiseCancelingSelect.removeAttribute('disabled');
-    delaySlider.removeAttribute('disabled');
+    noiseCancelingCheckbox.removeAttribute('disabled');
+    autoGainCheckbox.removeAttribute('disabled');
     volumeSlider.removeAttribute('disabled');
 
     transcriptDiv.classList.remove("thinking");
@@ -92,7 +94,15 @@ startButton.addEventListener('click', async function () {
     handleStart();
 
     if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
-        window.navigator.mediaDevices.getUserMedia({ audio: true })
+        window.navigator.mediaDevices.getUserMedia({
+            audio: {
+                noiseSuppression: noiseCanceling,
+                autoGainControl: autoGainControl,
+                echoCancellation: false,
+                sampleRate: 192000,
+                sampleSize: 24
+            },
+        })
         .then(stream => {
             localStream = stream;
             if (recognition) {
@@ -190,10 +200,6 @@ startButton.addEventListener('click', async function () {
             console.log(`onstart: ${JSON.stringify(event)}`);
         }
 
-        
-
-        
-
         if (wakeLockSupported) {
              // Listen for wake lock release
             try {
@@ -247,34 +253,14 @@ const playWithDelay = function (stream) {
     try {
         context = new AudioContext();
         const source = context.createMediaStreamSource(stream);
-        const delayValue = parseInt(delaySlider.value, 10);
         const volumeValue = parseInt(volumeSlider.value, 10);
-        const delay = delayValue > 0
-            ? context.createDelay(delayValue)
-            : null;
 
         const gainNode = context.createGain();
         gainNode.gain.setValueAtTime(volumeValue, context.currentTime);
 
-        if (noiseCanceling === 0) {
-            // no noise canceling
-            source.connect(gainNode);
-        } else {
-            // Create a low-pass filter
-            const lowpass = context.createBiquadFilter();
-            lowpass.type = "lowpass";
-            lowpass.frequency.value = 1500;
+        source.connect(gainNode);
+        gainNode.connect(context.destination);
 
-            source.connect(lowpass);
-            lowpass.connect(gainNode);
-        }
-
-        if (delay) {
-            gainNode.connect(delay);
-            delay.connect(context.destination);
-        } else {
-            gainNode.connect(context.destination);
-        }
     } catch (err) {
         console.log(`playWithDelay error detected: ${err}`);
     }
@@ -332,12 +318,6 @@ navigator.serviceWorker.register('/sw.js')
         })
     })
     .catch(err => console.log('Boo!', err));
-
-// setTimeout(() => {
-//     const img = new Image();
-//     img.src = '/images/icons/logo-512.png';
-//     document.body.appendChild(img);
-// }, 3000);
 
 navigator.serviceWorker.addEventListener('controllerchange', (reg) => {
     // This fires when the service worker controlling this page
