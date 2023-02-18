@@ -11,6 +11,10 @@ body {
     box-shadow: 2px 2px 10px #ccc;
 }
 
+.control-container {
+    margin-top: 10px;
+}
+
 #transcript-div {
     height: 250px;
     overflow-y: auto;
