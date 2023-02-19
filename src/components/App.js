@@ -475,6 +475,7 @@ function App() {
                         valueLabelDisplay='auto'
                         min={0}
                         max={10}
+                        size='medium'
                       />
                       <VolumeUp />
                     </Stack>
