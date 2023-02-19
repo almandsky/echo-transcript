@@ -58,6 +58,7 @@ module.exports = {
       clientsClaim: true,
       skipWaiting: true,
       swDest: 'sw.js',
+      maximumFileSizeToCacheInBytes: 15728640,
       runtimeCaching: [
         {
           urlPattern: /.*\.css/,
