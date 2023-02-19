@@ -81,7 +81,7 @@ function App() {
         audio: {
           noiseSuppression: noiseCanceling,
           autoGainControl: autoGainControl,
-          echoCancellation: false,
+          echoCancellation: true,
           sampleRate: 192000,
           sampleSize: 24
         },
@@ -400,7 +400,7 @@ function App() {
               </Box>
 
               <Box align="center">
-                <FormControl component="fieldset" variant="standard">
+                <FormControl component="fieldset" variant="standard" align='left'>
                   <InputLabel id="language-select-label" variant="standard">Language</InputLabel>
                   <Select
                     labelId="language-select-label"
