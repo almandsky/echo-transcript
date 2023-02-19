@@ -25,8 +25,9 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import VolumeDown from "@mui/icons-material/VolumeDown";
 import VolumeOff from "@mui/icons-material/VolumeOff";
-
 import VolumeUp from "@mui/icons-material/VolumeUp";
+
+import { grey } from '@mui/material/colors';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -490,7 +491,7 @@ function App() {
                         max={10}
                         sx={{ minWidth: 50 }}
                       />
-                      <VolumeUp />
+                      <VolumeUp sx={{ color: volume ? '' : grey[500] }}/>
                     </Stack>
                   </FormGroup>
                 </FormControl>
