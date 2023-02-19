@@ -77,11 +77,24 @@ function App() {
 
   const startProcess = async () => {
     if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
+      let hasHeadphone = false;
+      navigator.mediaDevices.enumerateDevices()
+        .then((devices) => {
+          devices.forEach((device) => {
+            if (device.kind === 'audiooutput' && device.label && device.label.toLowerCase().includes('headphone')) {
+              console.log('Headphone detected!');
+              hasHeadphone = true;
+            }
+          });
+        })
+        .catch((err) => {
+          console.error(`${err.name}: ${err.message}`);
+        });
       window.navigator.mediaDevices.getUserMedia({
         audio: {
           noiseSuppression: noiseCanceling,
           autoGainControl: autoGainControl,
-          echoCancellation: false,
+          echoCancellation: !hasHeadphone,
           sampleRate: 192000,
           sampleSize: 24
         },
@@ -485,9 +498,7 @@ function App() {
             </Grid>
             <Grid item xs={12} sm={6}>
               <Card raised sx={{
-                p: 2,
-                minHeight: 200,
-                maxHeight: 300
+                p: 2
               }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
             </Grid>
           </Grid>
