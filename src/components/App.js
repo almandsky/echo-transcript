@@ -58,22 +58,22 @@ function App() {
 
   function typeMessage(element, message, callback) {
     try {
-        let i = 0;
-        let intervalId = setInterval(() => {
-            element.innerHTML += message.slice(i, i + 1);
-            i++;
-            if (i > message.length) {
-                clearInterval(intervalId);
-                if (callback) {
-                    callback();
-                }
-            }
-        }, 50);
+      let i = 0;
+      let intervalId = setInterval(() => {
+        element.innerHTML += message.slice(i, i + 1);
+        i++;
+        if (i > message.length) {
+          clearInterval(intervalId);
+          if (callback) {
+            callback();
+          }
+        }
+      }, 30);
     } catch (err) {
-        console.log(`typeMessage error detected: ${err}`);
+      console.log(`typeMessage error detected: ${err}`);
     }
-    
-}
+
+  }
 
   const startProcess = async () => {
     if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
@@ -117,8 +117,8 @@ function App() {
               message += '. ';
             }
 
-            typeMessage(transcriptDiv, message, ()=> {
-                transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+            typeMessage(transcriptDiv, message, () => {
+              transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
             });
             setThinking(false);
           } else {
