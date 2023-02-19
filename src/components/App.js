@@ -475,7 +475,7 @@ function App() {
                         valueLabelDisplay='auto'
                         min={0}
                         max={10}
-                        sx={{ minWidth: 70 }}
+                        sx={{ minWidth: 50 }}
                       />
                       <VolumeUp />
                     </Stack>
