@@ -81,7 +81,7 @@ function App() {
         audio: {
           noiseSuppression: noiseCanceling,
           autoGainControl: autoGainControl,
-          echoCancellation: true,
+          echoCancellation: false,
           sampleRate: 192000,
           sampleSize: 24
         },
