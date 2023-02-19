@@ -479,7 +479,7 @@ function App() {
                     />
                     <Stack spacing={2} direction="row" alignItems="center">
                       {
-                        volume ? (<VolumeDown />) : (<VolumeOff />)
+                        volume ? (<VolumeDown sx={{ color: playing ? grey[500] : '' }}/>) : (<VolumeOff sx={{ color: playing ? grey[500] : '' }}/>)
                       }
                       <Slider
                         aria-label="Volume"
@@ -491,7 +491,7 @@ function App() {
                         max={10}
                         sx={{ minWidth: 50 }}
                       />
-                      <VolumeUp sx={{ color: volume ? '' : grey[500] }}/>
+                      <VolumeUp sx={{ color: playing || !volume ? grey[500] : '' }}/>
                     </Stack>
                   </FormGroup>
                 </FormControl>
