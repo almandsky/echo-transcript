@@ -38,15 +38,13 @@ function App() {
   const [state, setState] = useState({
     language: 'en-US',
     noiseCanceling: true,
-    autoGainControl: true,
-    volume: 1,
+    autoGainControl: true
   });
 
   const {
     language,
     noiseCanceling,
     autoGainControl,
-    volume
   } = state;
 
   const [playing, setPlaying] = useState(false);
@@ -56,6 +54,7 @@ function App() {
   const [thinking, setThinking] = useState(false);
   const [wakeLock, setWakeLock] = useState(null);
   const [wakeLockSupported, setWakeLockSupported] = useState(null);
+  const [volume, setVolume] = useState(1);
 
   function typeMessage(element, message, callback) {
     try {
@@ -360,10 +359,7 @@ function App() {
   };
 
   const handleVolumeChange = (event, newValue) => {
-    setState({
-      ...state,
-      volume: newValue
-    });
+    setVolume(newValue);
   };
 
   const handleNoiseCancelingChange = (event, newValue) => {
@@ -479,7 +475,7 @@ function App() {
                     />
                     <Stack spacing={2} direction="row" alignItems="center">
                       {
-                        volume ? (<VolumeDown sx={{ color: playing ? grey[500] : '' }}/>) : (<VolumeOff sx={{ color: playing ? grey[500] : '' }}/>)
+                        volume ? (<VolumeDown sx={{ color: playing ? grey[500] : '' }}  disabled={!playing}/>) : (<VolumeOff sx={{ color: playing ? grey[500] : '' }}  disabled={!playing} />)
                       }
                       <Slider
                         aria-label="Volume"
@@ -491,7 +487,7 @@ function App() {
                         max={10}
                         sx={{ minWidth: 50 }}
                       />
-                      <VolumeUp sx={{ color: playing || !volume ? grey[500] : '' }}/>
+                      <VolumeUp sx={{ color: playing || !volume ? grey[500] : '' }} disabled={!playing}/>
                     </Stack>
                   </FormGroup>
                 </FormControl>
