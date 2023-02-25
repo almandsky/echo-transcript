@@ -2,7 +2,6 @@ const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
-const { GenerateSW } = require('workbox-webpack-plugin');
 
 process.env.NODE_ENV = "development";
 
@@ -38,42 +37,6 @@ module.exports = {
         { from: "src/manifest.json", to: "manifest.json" },
       ],
     }),
-    // new GenerateSW({
-    //   clientsClaim: true,
-    //   skipWaiting: true,
-    //   swDest: 'sw.js',
-    //   maximumFileSizeToCacheInBytes: 15728640,
-    //   runtimeCaching: [
-    //     {
-    //       urlPattern: /.*\.css/,
-    //       handler: 'NetworkOnly',
-    //       options: {
-    //         cacheName: 'css-cache',
-    //       },
-    //     },
-    //     {
-    //       urlPattern: /\.(png|jpg|jpeg|svg|gif|ico)$/,
-    //       handler: 'StaleWhileRevalidate',
-    //       options: {
-    //         cacheName: 'image-cache',
-    //       },
-    //     },
-    //     {
-    //       urlPattern: /.*\.js/,
-    //       handler: 'NetworkOnly',
-    //       options: {
-    //         cacheName: 'js-cache',
-    //       },
-    //     },
-    //     {
-    //       urlPattern: /index\.html/,
-    //       handler: 'NetworkOnly',
-    //       options: {
-    //         cacheName: 'html-cache',
-    //       },
-    //     },
-    //   ],
-    // }),
   ],
   module: {
     rules: [
