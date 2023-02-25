@@ -108,7 +108,7 @@ function TalkGPT() {
         setAnswering(true);
         const token = process.env.OPENAI_API_KEY;
         const response = await axios.post('https://api.openai.com/v1/completions', {
-            "model": "text-ada-001",
+            "model": "text-davinci-003",
             "prompt": newPrompt,
             "temperature": 0.7,
             "max_tokens": 255,
