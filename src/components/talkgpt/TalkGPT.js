@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 
 import Box from '@mui/material/Box';
@@ -29,6 +29,9 @@ import VolumeUp from "@mui/icons-material/VolumeUp";
 
 import { grey } from '@mui/material/colors';
 
+const HUMAN_PREFIX = 'HUMAN: ';
+const AI_PREFIX = 'AI: ';
+
 function TalkGPT() {
 
     const [state, setState] = useState({
@@ -49,6 +52,7 @@ function TalkGPT() {
     const [localStream, setStream] = useState(null);
     const [audioContext, setAudioContext] = useState(null);
     const [speechRecognition, setRecognition] = useState(null);
+    const [synth, setSynth] = useState(null);
     const [thinking, setThinking] = useState(false);
     const [answering, setAnswering] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
@@ -58,6 +62,24 @@ function TalkGPT() {
 
 
     const [text, setText] = useState('');
+    const [chatHistory, setChatHistory] = useState([
+        // 'HUMAN: Hello, who are you?',
+        // 'AI: I am an AI created by OpenAI. How can I help you today?',
+        // 'Human: what do you like?',
+        // 'AI: I love exploring new ideas and helping people improve their lives. I especially like to focus on making technology that is easy to use and helpful for everyone.',
+        // 'Human: do you know what I like?',
+        // 'AI: I don\'t know exactly what you like, but I can make some suggestions based on what I know about you. What are some activities or topics that you usually enjoy?',
+        // 'Human: any things you can suggests to a 45 years old man?'
+    ]);
+
+    const textFieldRef = useRef(null);
+
+
+    useEffect(() => {
+        textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
+      }, [textFieldRef.current?.value]);
+
+
     const handleInputChange = (event) => {
         setText(event.target.value);
     };
@@ -74,30 +96,31 @@ function TalkGPT() {
         const answerDiv = document.querySelector('#answer-div');
         const textToRead = transcriptDiv.innerHTML || text;
 
+        
         if (!textToRead) {
             return;
         }
+
+        const newPrompt = chatHistory.join('\n');
+
+        console.log('sky debug 4001 newPrompt is ', newPrompt);
 
         setAnswering(true);
         const token = process.env.OPENAI_API_KEY;
         const response = await axios.post('https://api.openai.com/v1/completions', {
             "model": "text-ada-001",
-            "prompt": textToRead,
+            "prompt": newPrompt,
             "temperature": 0.7,
             "max_tokens": 255,
             "top_p": 1,
             "frequency_penalty": 0,
-            "presence_penalty": 0
+            "presence_penalty": 0,
+            "stop": [`\n${HUMAN_PREFIX}`, `\n${AI_PREFIX}`]
           }, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
         });
-
-        
-
-
-        const synth = window.speechSynthesis;
 
         console.log('sky debug 1000 language are: ', language);
 
@@ -107,11 +130,20 @@ function TalkGPT() {
 
         const answerText = response.data.choices[0].text;
 
-        typeMessage(answerDiv, answerText, () => {
+        setChatHistory([
+            ...chatHistory,
+            answerText
+        ])
+
+        const textToDisplay = answerText.replace(/^\nAI:\n\n/, '');
+
+        console.log('sky debug 1003 textToDisplay are: ', textToDisplay);
+
+        typeMessage(answerDiv, textToDisplay, () => {
             answerDiv.scrollTop = answerDiv.scrollHeight;
         });
 
-        const utterance = new SpeechSynthesisUtterance(answerText);
+        const utterance = new SpeechSynthesisUtterance(textToDisplay);
         // utterance.lang = language;
         utterance.voice = voices.find((voice) => voice.lang === language);
         utterance.rate = 0.9;
@@ -196,6 +228,11 @@ function TalkGPT() {
                         }
 
                         setThinking(false);
+                        const historyMessage = HUMAN_PREFIX + message;
+                        setChatHistory([
+                            ...chatHistory,
+                            historyMessage
+                        ])
                         typeMessage(transcriptDiv, message, async () => {
                             transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
                             await handleButtonClick();
@@ -283,6 +320,10 @@ function TalkGPT() {
             speechRecognition.stop();
         }
 
+        if (synth) {
+            synth.cancel()
+        }
+
         localStream && localStream.getAudioTracks().forEach((audioTrack) => {
             if (audioTrack) {
                 audioTrack.stop();
@@ -307,6 +348,7 @@ function TalkGPT() {
     // componentDidMount
     useEffect(() => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const synthesis = window.speechSynthesis;
 
         const supportedVoices = window.speechSynthesis.getVoices();
         setVoices(supportedVoices);
@@ -327,7 +369,8 @@ function TalkGPT() {
             console.log('Wake lock is not supported by this browser.')
         }
 
-        setRecognition(recognition)
+        setRecognition(recognition);
+        setSynth(synthesis);
         setWakeLockSupported(tempWakeLockSupported);
         // based on is playing or not, either start the audio or stop.
     }, []);
@@ -381,7 +424,10 @@ function TalkGPT() {
 
     const handleResetClick = () => {
         const transcriptDiv = document.querySelector('#transcript-div');
+        const answerDiv = document.querySelector('#answer-div');
         transcriptDiv.innerHTML = '';
+        answerDiv.innerHTML = '';
+        setChatHistory([]);
     };
 
     const handleLanguageChange = (event, newValue) => {
@@ -522,19 +568,18 @@ function TalkGPT() {
                     <Grid item xs={12} sm={4}>
                         <Card raised sx={{ p: 2 }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={12}>
                         <TextField
                             id="text-input"
-                            label="Enter Text"
+                            label="Chat History"
                             variant="outlined"
                             multiline
+                            sx={{width: '100%'}}
                             rows={4}
-                            value={text}
+                            value={chatHistory.join('\n')}
                             onChange={handleInputChange}
+                            inputRef={textFieldRef}
                         />
-                        <Button variant="contained" onClick={handleButtonClick}>
-                            Read Text
-                        </Button>
                     </Grid>
                 </Grid>
             </Paper>
