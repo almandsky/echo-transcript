@@ -28,6 +28,7 @@ const Header = () => {
 
     const routes = {
         '/': "Echo Transcript",
+        '/talkgpt': "Talk to GPT",
         '/about': "About"
     }
 

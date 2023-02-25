@@ -6,7 +6,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 
 import Header from './common/Header';
 import EchoTranscript from './echotranscript/EchoTranscript';
-import About from './about/About';
+import TalkGPT from './talkgpt/TalkGPT';
+import AboutPage from './about/About';
+import PageNotFound from './PageNotFound';
 
 const theme = createTheme();
 
@@ -58,7 +60,9 @@ function App() {
       <Header />
       <Switch>
         <Route exact path="/" component={EchoTranscript} />
-        <Route path="/about" component={About} />
+        <Route exact path="/talkgpt" component={TalkGPT} />
+        <Route path="/about" component={AboutPage} />
+        <Route component={PageNotFound} />
       </Switch>
     </ThemeProvider>
   );
