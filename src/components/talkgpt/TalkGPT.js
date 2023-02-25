@@ -59,20 +59,21 @@ function TalkGPT() {
         setText(event.target.value);
     };
 
+    const supportedVoices = window.speechSynthesis.getVoices();
+
     const handleButtonClick = () => {
         const transcriptDiv = document.querySelector('#transcript-div');
         const textToRead = transcriptDiv.innerHTML || text;
         const synth = window.speechSynthesis;
 
 
-        console.log('sky debug 1001 window.speechSynthesis.getVoices() are: ', window.speechSynthesis.getVoices());
-        const supportedVoices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.includes(language));
+        console.log('sky debug 1000 language are: ', language);
 
         console.log('sky debug 1002 supportedVoices are: ', supportedVoices);
 
 
         const utterance = new SpeechSynthesisUtterance(textToRead);
-        utterance.lang = language;
+        // utterance.lang = language;
         utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         utterance.rate = 0.9;
         synth.speak(utterance);
