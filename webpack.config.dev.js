@@ -36,45 +36,44 @@ module.exports = {
         { from: "sitemap.xml", to: "sitemap.xml" },
         { from: "src/images", to: "images" },
         { from: "src/manifest.json", to: "manifest.json" },
-        // { from: "sw.js", to: "sw.js" },
       ],
     }),
-    new GenerateSW({
-      clientsClaim: true,
-      skipWaiting: true,
-      swDest: 'sw.js',
-      maximumFileSizeToCacheInBytes: 15728640,
-      runtimeCaching: [
-        {
-          urlPattern: /.*\.css/,
-          handler: 'NetworkOnly',
-          options: {
-            cacheName: 'css-cache',
-          },
-        },
-        {
-          urlPattern: /\.(png|jpg|jpeg|svg|gif|ico)$/,
-          handler: 'StaleWhileRevalidate',
-          options: {
-            cacheName: 'image-cache',
-          },
-        },
-        {
-          urlPattern: /.*\.js/,
-          handler: 'NetworkOnly',
-          options: {
-            cacheName: 'js-cache',
-          },
-        },
-        {
-          urlPattern: /index\.html/,
-          handler: 'NetworkOnly',
-          options: {
-            cacheName: 'html-cache',
-          },
-        },
-      ],
-    }),
+    // new GenerateSW({
+    //   clientsClaim: true,
+    //   skipWaiting: true,
+    //   swDest: 'sw.js',
+    //   maximumFileSizeToCacheInBytes: 15728640,
+    //   runtimeCaching: [
+    //     {
+    //       urlPattern: /.*\.css/,
+    //       handler: 'NetworkOnly',
+    //       options: {
+    //         cacheName: 'css-cache',
+    //       },
+    //     },
+    //     {
+    //       urlPattern: /\.(png|jpg|jpeg|svg|gif|ico)$/,
+    //       handler: 'StaleWhileRevalidate',
+    //       options: {
+    //         cacheName: 'image-cache',
+    //       },
+    //     },
+    //     {
+    //       urlPattern: /.*\.js/,
+    //       handler: 'NetworkOnly',
+    //       options: {
+    //         cacheName: 'js-cache',
+    //       },
+    //     },
+    //     {
+    //       urlPattern: /index\.html/,
+    //       handler: 'NetworkOnly',
+    //       options: {
+    //         cacheName: 'html-cache',
+    //       },
+    //     },
+    //   ],
+    // }),
   ],
   module: {
     rules: [
