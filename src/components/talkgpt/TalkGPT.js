@@ -57,7 +57,7 @@ function TalkGPT() {
     const [answering, setAnswering] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
-    const [volume, setVolume] = useState(1);
+    const [volume, setVolume] = useState(0);
     const [voices, setVoices] = useState(null);
 
 
