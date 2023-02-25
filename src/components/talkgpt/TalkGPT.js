@@ -73,7 +73,7 @@ function TalkGPT() {
 
         const utterance = new SpeechSynthesisUtterance(textToRead);
         utterance.lang = language;
-        // utterance.voice = supportedVoices.find((voice) => voice.lang === language && voice.name.includes('Google'));
+        utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         utterance.rate = 0.9;
         synth.speak(utterance);
     };
