@@ -15,7 +15,7 @@ nav {
 #transcript-div {
   overflow-y: auto;
   height: 200px;
-  font-size: 1.25rem;
+  font-size: 1rem;
   line-height: 1.5;
   white-space: pre-wrap;       /* Since CSS 2.1 */
   white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */

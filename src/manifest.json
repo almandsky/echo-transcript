@@ -31,8 +31,8 @@
         "purpose": "maskable"
       }
     ],
-    "theme_color": "#282c34",
-    "background_color": "#282c34",
+    "theme_color": "#1976D2",
+    "background_color": "#1976D2",
     "description": "A tools to help improve pronunciation",
     "categories": [
       "productivity",
