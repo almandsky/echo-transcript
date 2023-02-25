@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Checkbox from '@mui/material/Checkbox';
+import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
+
 
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -17,6 +20,8 @@ import Select from "@mui/material/Select";
 import Slider from '@mui/material/Slider';
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+
 
 import VolumeDown from "@mui/icons-material/VolumeDown";
 import VolumeOff from "@mui/icons-material/VolumeOff";
@@ -25,10 +30,6 @@ import VolumeUp from "@mui/icons-material/VolumeUp";
 import { grey } from '@mui/material/colors';
 
 function TalkGPT() {
-
-    
-
-
 
     const [state, setState] = useState({
         language: 'en-US',
@@ -49,9 +50,11 @@ function TalkGPT() {
     const [audioContext, setAudioContext] = useState(null);
     const [speechRecognition, setRecognition] = useState(null);
     const [thinking, setThinking] = useState(false);
+    const [answering, setAnswering] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [volume, setVolume] = useState(1);
+    const [voices, setVoices] = useState(null);
 
 
     const [text, setText] = useState('');
@@ -59,24 +62,63 @@ function TalkGPT() {
         setText(event.target.value);
     };
 
-    const supportedVoices = window.speechSynthesis.getVoices();
+    const handleButtonClick = async () => {
+        if (!voices || !voices.length) {
+            const supportedVoices = window.speechSynthesis.getVoices();
+            setVoices(supportedVoices);
+            console.log('sky debug 2001 supportedVoices are: ', supportedVoices);
+            console.log('sky debug 2002 supportedVoices are: ', voices);
+        }
 
-    const handleButtonClick = () => {
         const transcriptDiv = document.querySelector('#transcript-div');
+        const answerDiv = document.querySelector('#answer-div');
         const textToRead = transcriptDiv.innerHTML || text;
-        const synth = window.speechSynthesis;
 
+        if (!textToRead) {
+            return;
+        }
+
+        setAnswering(true);
+        const token = process.env.OPENAI_API_KEY;
+        const response = await axios.post('https://api.openai.com/v1/completions', {
+            "model": "text-ada-001",
+            "prompt": textToRead,
+            "temperature": 0.7,
+            "max_tokens": 255,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 0
+          }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        
+
+
+        const synth = window.speechSynthesis;
 
         console.log('sky debug 1000 language are: ', language);
 
-        console.log('sky debug 1002 supportedVoices are: ', supportedVoices);
+        console.log('sky debug 1002 supportedVoices are: ', voices);
 
+        console.log('sky debug 1003 response are: ', response);
 
-        const utterance = new SpeechSynthesisUtterance(textToRead);
+        const answerText = response.data.choices[0].text;
+
+        typeMessage(answerDiv, answerText, () => {
+            answerDiv.scrollTop = answerDiv.scrollHeight;
+        });
+
+        const utterance = new SpeechSynthesisUtterance(answerText);
         // utterance.lang = language;
-        utterance.voice = supportedVoices.find((voice) => voice.lang === language);
+        utterance.voice = voices.find((voice) => voice.lang === language);
         utterance.rate = 0.9;
         synth.speak(utterance);
+
+        setAnswering(false);
+        transcriptDiv.innerHTML = '';
     };
 
     function typeMessage(element, message, callback) {
@@ -153,10 +195,11 @@ function TalkGPT() {
                             message += '. ';
                         }
 
-                        typeMessage(transcriptDiv, message, () => {
-                            transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
-                        });
                         setThinking(false);
+                        typeMessage(transcriptDiv, message, async () => {
+                            transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+                            await handleButtonClick();
+                        });
                     } else {
                         setThinking(true);
                     }
@@ -265,6 +308,9 @@ function TalkGPT() {
     useEffect(() => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+        const supportedVoices = window.speechSynthesis.getVoices();
+        setVoices(supportedVoices);
+
         let recognition;
         let tempWakeLockSupported;
         if (SpeechRecognition) {
@@ -339,6 +385,13 @@ function TalkGPT() {
     };
 
     const handleLanguageChange = (event, newValue) => {
+        console.log('sky debug 2000 voices are: ', voices);
+        if (!voices || !voices.length) {
+            const supportedVoices = window.speechSynthesis.getVoices();
+            setVoices(supportedVoices);
+            console.log('sky debug 2001 supportedVoices are: ', supportedVoices);
+            console.log('sky debug 2002 voices are: ', voices);
+        }
         setState({
             ...state,
             language: newValue.props.value
@@ -362,12 +415,13 @@ function TalkGPT() {
             autoGainControl: newValue
         });
     };
+    
 
     return (
         <Container component="main" sx={{ mb: 4 }}>
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6} sx={{ display: 'grid', gap: 2 }} id="controls">
+                    <Grid item xs={12} sm={4} sx={{ display: 'grid', gap: 2 }} id="controls">
                         <Box sx={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -462,10 +516,11 @@ function TalkGPT() {
                             </FormControl>
                         </Box>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <Card raised sx={{
-                            p: 2
-                        }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                    <Grid item xs={12} sm={4}>
+                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                        <Card raised sx={{ p: 2 }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <TextField
