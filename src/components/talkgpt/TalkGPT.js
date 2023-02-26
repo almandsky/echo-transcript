@@ -122,6 +122,16 @@ function TalkGPT() {
         const utterance = new SpeechSynthesisUtterance(textToDisplay);
         utterance.lang = language;
         utterance.rate = 0.9;
+
+        utterance.onstart = () => {
+            console.log('Speech started');
+            speechRecognition.stop();
+        };
+
+        utterance.onend = () => {
+            console.log('Speech ended');
+            speechRecognition.start();
+        };
         synth.speak(utterance);
 
         setAnswering(false);
@@ -256,7 +266,7 @@ function TalkGPT() {
 
             speechRecognition.onend = (event) => {
                 console.log(`onend: ${JSON.stringify(event)}`);
-                if (playing) {
+                if (playing && !synth.speaking) {
                     setPlaying(false);
                 }
             }
