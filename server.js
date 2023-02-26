@@ -8,7 +8,7 @@ app.use(compression());
 
 // output the console log
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${res.statusMessage}`);
+  console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${res.statusMessage || ''}`);
   next();
 });
 

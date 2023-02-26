@@ -195,7 +195,7 @@ function TalkGPT() {
                 if (speechRecognition) {
                     speechRecognition.mediaStream = stream;
                 }
-                playWithDelay(stream);
+                // playWithDelay(stream);
             })
                 .catch(error => {
                     console.error(error);
