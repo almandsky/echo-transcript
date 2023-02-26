@@ -68,6 +68,7 @@ function TalkGPT() {
 
 
     const processAnswer = async () => {
+        const supportedVoices = window.speechSynthesis.getVoices();
         const transcriptDiv = document.querySelector('#transcript-div');
         const answerDiv = document.querySelector('#answer-div');
         const textToRead = transcriptDiv.innerHTML;
@@ -109,8 +110,7 @@ function TalkGPT() {
 
         newPromptArray.push(answerText);
         
-
-        const textToDisplay = answerText.slice(answerText.indexOf(':') + 1);
+        const textToDisplay = answerText.slice(answerText.indexOf(':') + 1).slice(answerText.indexOf('：') + 1);
 
         console.log('sky debug 1003 textToDisplay are: ', textToDisplay);
 
@@ -120,6 +120,7 @@ function TalkGPT() {
         });
 
         const utterance = new SpeechSynthesisUtterance(textToDisplay);
+        utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         utterance.lang = language;
         utterance.rate = 0.9;
 
@@ -139,7 +140,9 @@ function TalkGPT() {
     };
 
     const testSpeech = (message) => {
+        const supportedVoices = window.speechSynthesis.getVoices();
         const utterance = new SpeechSynthesisUtterance(message);
+        utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         utterance.lang = language;
         utterance.rate = 0.9;
         synth.speak(utterance);
