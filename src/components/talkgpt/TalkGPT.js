@@ -380,6 +380,7 @@ function TalkGPT() {
         // based on is playing or not, either start the audio or stop.
         if (playing) {
             await startProcess();
+            testSpeech('Let\'s start!');
         } else {
             stopProcess();
         }
@@ -389,12 +390,10 @@ function TalkGPT() {
 
 
     const handleStartClick = async () => {
-        testSpeech('Let\'s start!');
         setPlaying(true);
     };
 
     const handleStopClick = () => {
-        testSpeech('Stop');
         setPlaying(false);
     };
 
