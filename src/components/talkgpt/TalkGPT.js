@@ -510,7 +510,7 @@ function TalkGPT() {
                             // onChange={handleInputChange}
                             inputRef={textFieldRef}
                         />
-                        <Button onClick={handleOnclickTest}>test answer</Button>
+                        <Button onClick={handleOnclickTest}>Repeat the GPT answer</Button>
                     </Grid>
                 </Grid>
             </Paper>
