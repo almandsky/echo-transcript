@@ -491,11 +491,11 @@ function TalkGPT() {
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Typography variant="caption">You</Typography>
+                        <Typography variant="caption">You:</Typography>
                         <Card raised sx={{ p: 2, bgcolor: '#f0faed' }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Typography variant="caption">GPT</Typography>
+                        <Typography variant="caption">chatGPT:</Typography>
                         <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
@@ -509,7 +509,7 @@ function TalkGPT() {
                             value={chatHistory.join('\n')}
                             inputRef={textFieldRef}
                         />
-                        <Button onClick={handleOnclickTest}>Repeat the GPT answer</Button>
+                        <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
                     </Grid>
                 </Grid>
             </Paper>
