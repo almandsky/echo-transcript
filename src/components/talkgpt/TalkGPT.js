@@ -29,6 +29,8 @@ import VolumeUp from "@mui/icons-material/VolumeUp";
 
 import { grey } from '@mui/material/colors';
 
+import LanguageSelect from '../common/LanguageSelect';
+
 const HUMAN_PREFIX = 'Human:';
 const AI_PREFIX = 'AI:';
 
@@ -61,8 +63,9 @@ function TalkGPT() {
     const [voices, setVoices] = useState(null);
     const [model, setModel] = useState('text-ada-001');
 
-    const [text, setText] = useState('');
     const [chatHistory, setChatHistory] = useState([
+        // '\nHuman:\n\nhow are you?',
+        // '\nAI:\n\nI am fine. How can I help you today?',
         // 'AI: I am an AI created by OpenAI. How can I help you today?',
         // 'Human: what do you like?',
         // 'AI: I love exploring new ideas and helping people improve their lives. I especially like to focus on making technology that is easy to use and helpful for everyone.',
@@ -73,15 +76,10 @@ function TalkGPT() {
 
     const textFieldRef = useRef(null);
 
-
     useEffect(() => {
         textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
     }, [textFieldRef.current?.value]);
 
-
-    const handleInputChange = (event) => {
-        setText(event.target.value);
-    };
 
     const handleButtonClick = async () => {
         if (!voices || !voices.length) {
@@ -100,10 +98,9 @@ function TalkGPT() {
             return;
         }
 
-        const newPromptArray = [
-            ...chatHistory,
-            HUMAN_PREFIX + '\n\n' + textToRead
-        ]
+        const newPromptArray = chatHistory;
+
+        newPromptArray.push(HUMAN_PREFIX + textToRead);
 
         const newPrompt = newPromptArray.join('\n');
 
@@ -126,18 +123,11 @@ function TalkGPT() {
             },
         });
 
-        console.log('sky debug 1000 language are: ', language);
-
-        console.log('sky debug 1002 supportedVoices are: ', voices);
-
-        console.log('sky debug 1003 response are: ', response);
 
         const answerText = response.data.choices[0].text;
 
-        setChatHistory([
-            ...chatHistory,
-            answerText
-        ])
+        newPromptArray.push(answerText);
+        
 
         const textToDisplay = answerText.replace(/^\nAI:\n\n/, '');
 
@@ -145,6 +135,7 @@ function TalkGPT() {
 
         typeMessage(answerDiv, textToDisplay, () => {
             answerDiv.scrollTop = answerDiv.scrollHeight;
+            setChatHistory(newPromptArray);
         });
 
         const utterance = new SpeechSynthesisUtterance(textToDisplay);
@@ -212,7 +203,7 @@ function TalkGPT() {
         }
 
         if (speechRecognition) {
-            speechRecognition.onresult = function (event) {
+            speechRecognition.onresult = (event) => {
                 const transcriptDiv = document.querySelector('#transcript-div');
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const result = event.results[i];
@@ -488,7 +479,7 @@ function TalkGPT() {
 
                         <Box align="center">
                             <FormControl component="fieldset" variant="standard" align='left'>
-                                <Box sx={{ position: 'relative' }}>
+                                <FormControl variant="standard">
                                     <InputLabel id="model-select-label" variant="standard">Model</InputLabel>
                                     <Select
                                         labelId="model-select-label"
@@ -503,56 +494,14 @@ function TalkGPT() {
                                         <MenuItem value="text-curie-001">text-curie-001</MenuItem>
                                         <MenuItem value="text-davinci-003">text-davinci-003</MenuItem>
                                     </Select>
-                                </Box>
-                                <Box sx={{ position: 'relative' }}>
-                                    <InputLabel id="language-select-label" variant="standard">Language</InputLabel>
-                                    <Select
-                                        labelId="language-select-label"
-                                        id="language-select"
-                                        label="Language"
+                                </FormControl>
+                                <FormControl variant="standard">
+                                    <LanguageSelect
                                         onChange={handleLanguageChange}
                                         disabled={playing}
                                         value={language}
-                                    >
-                                        <MenuItem value="ar-SA">Arabic Saudi Arabia</MenuItem>
-                                        <MenuItem value="cs-CZ">Czech Czech Republic</MenuItem>
-                                        <MenuItem value="da-DK">Danish Denmark</MenuItem>
-                                        <MenuItem value="de-DE">German Germany</MenuItem>
-                                        <MenuItem value="el-GR">Modern Greek Greece</MenuItem>
-                                        <MenuItem value="en-AU">English (Australia)</MenuItem>
-                                        <MenuItem value="en-GB">English (United Kingdom)</MenuItem>
-                                        <MenuItem value="en-IE">English (Ireland)</MenuItem>
-                                        <MenuItem value="en-US">English (United States)</MenuItem>
-                                        <MenuItem value="en-ZA">English (South Africa)</MenuItem>
-                                        <MenuItem value="es-ES">Spanish (Spain)</MenuItem>
-                                        <MenuItem value="es-MX">Spanish (Mexico)</MenuItem>
-                                        <MenuItem value="fi-FI">Finnish Finland</MenuItem>
-                                        <MenuItem value="fr-CA">French (Canada)</MenuItem>
-                                        <MenuItem value="fr-FR">French (France)</MenuItem>
-                                        <MenuItem value="he-IL">Hebrew Israel</MenuItem>
-                                        <MenuItem value="hi-IN">Hindi India</MenuItem>
-                                        <MenuItem value="hu-HU">Hungarian Hungary</MenuItem>
-                                        <MenuItem value="id-ID">Indonesian Indonesia</MenuItem>
-                                        <MenuItem value="it-IT">Italian Italy</MenuItem>
-                                        <MenuItem value="ja-JP">Japanese Japan</MenuItem>
-                                        <MenuItem value="ko-KR">Korean Republic of Korea</MenuItem>
-                                        <MenuItem value="nl-BE">Dutch Belgium</MenuItem>
-                                        <MenuItem value="nl-NL">Dutch Netherlands</MenuItem>
-                                        <MenuItem value="no-NO">Norwegian Norway</MenuItem>
-                                        <MenuItem value="pl-PL">Polish Poland</MenuItem>
-                                        <MenuItem value="pt-BR">Portuguese Brazil</MenuItem>
-                                        <MenuItem value="pt-PT">Portuguese Portugal</MenuItem>
-                                        <MenuItem value="ro-RO">Romanian Romania</MenuItem>
-                                        <MenuItem value="ru-RU">Russian Russian Federation</MenuItem>
-                                        <MenuItem value="sk-SK">Slovak Slovakia</MenuItem>
-                                        <MenuItem value="sv-SE">Swedish Sweden</MenuItem>
-                                        <MenuItem value="th-TH">Thai Thailand</MenuItem>
-                                        <MenuItem value="tr-TR">Turkish Turkey</MenuItem>
-                                        <MenuItem value="zh-CN">Chinese (China)</MenuItem>
-                                        <MenuItem value="zh-HK">Chinese (Hong Kong)</MenuItem>
-                                        <MenuItem value="zh-TW">Chinese (Taiwan)</MenuItem>
-                                    </Select>
-                                </Box>
+                                    />
+                                </FormControl>
                                 <FormGroup>
                                     <FormControlLabel
                                         control={
