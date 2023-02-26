@@ -448,7 +448,7 @@ function TalkGPT() {
 
                         <Box align="center">
                             <FormControl component="fieldset" variant="standard" align='left'>
-                                <FormControl variant="standard">
+                                <FormControl variant="standard" sx={{ mb: 1 }}>
                                     <InputLabel id="model-select-label" variant="standard">Model</InputLabel>
                                     <Select
                                         labelId="model-select-label"
@@ -507,7 +507,6 @@ function TalkGPT() {
                             sx={{ width: '100%' }}
                             rows={4}
                             value={chatHistory.join('\n')}
-                            // onChange={handleInputChange}
                             inputRef={textFieldRef}
                         />
                         <Button onClick={handleOnclickTest}>Repeat the GPT answer</Button>
