@@ -133,8 +133,8 @@ function TalkGPT() {
         });
 
         const utterance = new SpeechSynthesisUtterance(textToDisplay);
-        // utterance.lang = language;
-        utterance.voice = supportedVoices.find((voice) => voice.lang === language);
+        utterance.lang = language;
+        // utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         utterance.rate = 0.9;
         synth.speak(utterance);
 
@@ -143,11 +143,11 @@ function TalkGPT() {
     };
 
     const handleOnclickTest = () => {
-        const supportedVoices = window.speechSynthesis.getVoices();
+        // const supportedVoices = window.speechSynthesis.getVoices();
         const answerDiv = document.querySelector('#answer-div');
         const utterance = new SpeechSynthesisUtterance(answerDiv.innerHTML);
-        // utterance.lang = language;
-        utterance.voice = supportedVoices.find((voice) => voice.lang === language);
+        utterance.lang = language;
+        // utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         utterance.rate = 0.9;
         synth.speak(utterance);
     };
