@@ -174,6 +174,11 @@ function TalkGPT() {
     }
 
     const startProcess = async () => {
+        window?.gtag('event', 'starttalk', {
+            'event_category': 'talkgpt',
+            'event_label': 'Start Talk to chatGPT',
+            language
+        });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
             navigator.mediaDevices.enumerateDevices()

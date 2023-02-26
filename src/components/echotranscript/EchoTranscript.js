@@ -64,6 +64,11 @@ function EchoTranscript() {
     }
 
     const startProcess = async () => {
+        window?.gtag('event', 'startecho', {
+            'event_category': 'echotranscript',
+            'event_label': 'Start Echo Transcript',
+            language
+        });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
             navigator.mediaDevices.enumerateDevices()
