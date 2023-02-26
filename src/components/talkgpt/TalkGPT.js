@@ -17,6 +17,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
 
@@ -73,9 +74,6 @@ function TalkGPT() {
         const answerDiv = document.querySelector('#answer-div');
         const textToRead = transcriptDiv.innerHTML;
 
-        console.log('sky debug 4000 synth is ', synth);
-
-
         if (!textToRead) {
             return;
         }
@@ -85,8 +83,6 @@ function TalkGPT() {
         newPromptArray.push(HUMAN_PREFIX + textToRead);
 
         const newPrompt = newPromptArray.join('\n');
-
-        console.log('sky debug 4001 newPrompt is ', newPrompt);
 
         setAnswering(true);
         const token = process.env.OPENAI_API_KEY;
@@ -111,8 +107,6 @@ function TalkGPT() {
         newPromptArray.push(answerText);
         
         const textToDisplay = answerText.slice(answerText.indexOf(':') + 1).slice(answerText.indexOf('：') + 1);
-
-        console.log('sky debug 1003 textToDisplay are: ', textToDisplay);
 
         typeMessage(answerDiv, textToDisplay, () => {
             answerDiv.scrollTop = answerDiv.scrollHeight;
@@ -493,10 +487,12 @@ function TalkGPT() {
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                        <Typography variant="caption">You</Typography>
+                        <Card raised sx={{ p: 2, bgcolor: '#f0faed' }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Card raised sx={{ p: 2 }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
+                        <Typography variant="caption">GPT</Typography>
+                        <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
                         <TextField
