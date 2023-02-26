@@ -12,9 +12,9 @@ nav {
   padding: 20px 0 20px 0;
 }
 
-#transcript-div {
+#transcript-div, #answer-div {
   overflow-y: auto;
-  height: 200px;
+  height: 150px;
   font-size: 1rem;
   line-height: 1.5;
   white-space: pre-wrap;       /* Since CSS 2.1 */

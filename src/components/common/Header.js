@@ -12,6 +12,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 import { NavLink, useLocation } from "react-router-dom";
 
+import routes from './routes';
+
+
 const Header = () => {
     const location = useLocation();
     const activeStyle = { color: "#1976D2" };
@@ -26,10 +29,11 @@ const Header = () => {
         setAnchorEl(null);
     };
 
-    const routes = {
-        '/': "Echo Transcript",
-        '/about': "About"
-    }
+    // const routes = {
+    //     '/': "Echo Transcript",
+    //     '/talkgpt': "Talk to GPT",
+    //     '/about': "About"
+    // }
 
     return (
         <AppBar position="static">

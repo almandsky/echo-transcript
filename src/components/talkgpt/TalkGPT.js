@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -6,23 +7,25 @@ import Card from '@mui/material/Card';
 import Checkbox from '@mui/material/Checkbox';
 import Container from '@mui/material/Container';
 
+
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Grid from '@mui/material/Grid';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 import Paper from "@mui/material/Paper";
-import Slider from '@mui/material/Slider';
-import Stack from "@mui/material/Stack";
+import Select from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
-import VolumeDown from "@mui/icons-material/VolumeDown";
-import VolumeOff from "@mui/icons-material/VolumeOff";
-import VolumeUp from "@mui/icons-material/VolumeUp";
+import LanguageSelect from '../common/LanguageSelect';
 
-import { grey } from '@mui/material/colors';
+const HUMAN_PREFIX = 'Human:';
+const AI_PREFIX = 'AI:';
 
-import LanguageSelect from "../common/LanguageSelect";
+function TalkGPT() {
 
-function EchoTranscript() {
     const [state, setState] = useState({
         language: 'en-US',
         noiseCanceling: true,
@@ -35,14 +38,119 @@ function EchoTranscript() {
         autoGainControl,
     } = state;
 
+
+
     const [playing, setPlaying] = useState(false);
     const [localStream, setStream] = useState(null);
-    const [audioContext, setAudioContext] = useState(null);
     const [speechRecognition, setRecognition] = useState(null);
+    const [synth, setSynth] = useState(null);
     const [thinking, setThinking] = useState(false);
+    const [answering, setAnswering] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
-    const [volume, setVolume] = useState(1);
+    const [model, setModel] = useState('text-davinci-003');
+
+    const [chatHistory, setChatHistory] = useState([
+        // '\nHuman:\n\nhow are you?',
+        // '\nAI:\n\nI am fine. How can I help you today?',
+        // 'AI: I am an AI created by OpenAI. How can I help you today?',
+        // 'Human: what do you like?',
+        // 'AI: I love exploring new ideas and helping people improve their lives. I especially like to focus on making technology that is easy to use and helpful for everyone.',
+        // 'Human: do you know what I like?',
+        // 'AI: I don\'t know exactly what you like, but I can make some suggestions based on what I know about you. What are some activities or topics that you usually enjoy?',
+        // 'Human: any things you can suggests to a 45 years old man?'
+    ]);
+
+    const textFieldRef = useRef(null);
+
+    useEffect(() => {
+        textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
+    }, [textFieldRef.current?.value]);
+
+
+    const processAnswer = async () => {
+        const supportedVoices = window.speechSynthesis.getVoices();
+        const transcriptDiv = document.querySelector('#transcript-div');
+        const answerDiv = document.querySelector('#answer-div');
+        const textToRead = transcriptDiv.innerHTML;
+
+        if (!textToRead) {
+            return;
+        }
+
+        const newPromptArray = chatHistory;
+
+        newPromptArray.push(HUMAN_PREFIX + textToRead);
+
+        const newPrompt = newPromptArray.join('\n');
+
+        setAnswering(true);
+        const token = process.env.OPENAI_API_KEY;
+        const response = await axios.post('https://api.openai.com/v1/completions', {
+            "model": model,
+            "prompt": newPrompt,
+            "temperature": 0.7,
+            "max_tokens": 255,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
+            "stop": [`${HUMAN_PREFIX}`, `${AI_PREFIX}`]
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+
+        const answerText = response.data.choices[0].text;
+
+        newPromptArray.push(answerText);
+        
+        const textToDisplay = answerText.slice(answerText.indexOf(':') + 1).slice(answerText.indexOf('：') + 1);
+
+        typeMessage(answerDiv, textToDisplay, () => {
+            answerDiv.scrollTop = answerDiv.scrollHeight;
+            setChatHistory(newPromptArray);
+        });
+
+        const utterance = new SpeechSynthesisUtterance(textToDisplay);
+        if (language !== 'en-US') {
+            utterance.voice = supportedVoices.find((voice) => voice.lang === language);
+        }
+        
+        utterance.lang = language;
+        utterance.rate = 0.9;
+
+        utterance.onstart = () => {
+            console.log('Speech started');
+            speechRecognition.stop();
+        };
+
+        utterance.onend = () => {
+            console.log('Speech ended');
+            speechRecognition.start();
+        };
+        synth.speak(utterance);
+
+        setAnswering(false);
+        transcriptDiv.innerHTML = '';
+    };
+
+    const testSpeech = (message) => {
+        const supportedVoices = window.speechSynthesis.getVoices();
+        const utterance = new SpeechSynthesisUtterance(message);
+        if (language !== 'en-US') {
+            utterance.voice = supportedVoices.find((voice) => voice.lang === language);
+        }
+        utterance.lang = language;
+        utterance.rate = 0.9;
+        synth.speak(utterance);
+    };
+
+    const handleOnclickTest = () => {
+        const answerDiv = document.querySelector('#answer-div');
+        testSpeech(answerDiv.innerHTML);
+    };
 
     function typeMessage(element, message, callback) {
         try {
@@ -91,7 +199,7 @@ function EchoTranscript() {
                 if (speechRecognition) {
                     speechRecognition.mediaStream = stream;
                 }
-                playWithDelay(stream);
+                // playWithDelay(stream);
             })
                 .catch(error => {
                     console.error(error);
@@ -99,8 +207,9 @@ function EchoTranscript() {
         }
 
         if (speechRecognition) {
-            speechRecognition.onresult = function (event) {
+            speechRecognition.onresult = (event) => {
                 const transcriptDiv = document.querySelector('#transcript-div');
+                const answerDiv = document.querySelector('#answer-div');
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const result = event.results[i];
                     if (result.isFinal) {
@@ -118,10 +227,17 @@ function EchoTranscript() {
                             message += '. ';
                         }
 
-                        typeMessage(transcriptDiv, message, () => {
-                            transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
-                        });
                         setThinking(false);
+                        const historyMessage = HUMAN_PREFIX + '\n\n' + message;
+                        setChatHistory([
+                            ...chatHistory,
+                            historyMessage
+                        ])
+                        typeMessage(transcriptDiv, message, async () => {
+                            transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+                            answerDiv.innerHTML = '';
+                            await processAnswer();
+                        });
                     } else {
                         setThinking(true);
                     }
@@ -152,7 +268,7 @@ function EchoTranscript() {
 
             speechRecognition.onend = (event) => {
                 console.log(`onend: ${JSON.stringify(event)}`);
-                if (playing) {
+                if (playing && !synth.speaking) {
                     setPlaying(false);
                 }
             }
@@ -205,15 +321,15 @@ function EchoTranscript() {
             speechRecognition.stop();
         }
 
+        if (synth) {
+            synth.cancel()
+        }
+
         localStream && localStream.getAudioTracks().forEach((audioTrack) => {
             if (audioTrack) {
                 audioTrack.stop();
             }
         });
-
-        if (audioContext) {
-            audioContext.close();
-        }
 
 
         if (wakeLockSupported && wakeLock) {
@@ -229,6 +345,7 @@ function EchoTranscript() {
     // componentDidMount
     useEffect(() => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const synthesis = window.speechSynthesis;
 
         let recognition;
         let tempWakeLockSupported;
@@ -246,7 +363,8 @@ function EchoTranscript() {
             console.log('Wake lock is not supported by this browser.')
         }
 
-        setRecognition(recognition)
+        setRecognition(recognition);
+        setSynth(synthesis);
         setWakeLockSupported(tempWakeLockSupported);
         // based on is playing or not, either start the audio or stop.
     }, []);
@@ -257,31 +375,12 @@ function EchoTranscript() {
         }
     }, [language]);
 
-    const playWithDelay = (stream) => {
-        let context;
-        try {
-            context = new AudioContext();
-            const source = context.createMediaStreamSource(stream);
-            const volumeValue = parseInt(volume, 10);
-
-            const gainNode = context.createGain();
-            gainNode.gain.setValueAtTime(volumeValue, context.currentTime);
-
-            source.connect(gainNode);
-            gainNode.connect(context.destination);
-
-        } catch (err) {
-            console.log(`playWithDelay error detected: ${err}`);
-        }
-
-        setAudioContext(audioContext);
-    };
-
     // playing status changed
     useEffect(async () => {
         // based on is playing or not, either start the audio or stop.
         if (playing) {
             await startProcess();
+            testSpeech('Let\'s start!');
         } else {
             stopProcess();
         }
@@ -300,7 +399,10 @@ function EchoTranscript() {
 
     const handleResetClick = () => {
         const transcriptDiv = document.querySelector('#transcript-div');
+        const answerDiv = document.querySelector('#answer-div');
         transcriptDiv.innerHTML = '';
+        answerDiv.innerHTML = '';
+        setChatHistory([]);
     };
 
     const handleLanguageChange = (event, newValue) => {
@@ -310,8 +412,8 @@ function EchoTranscript() {
         });
     };
 
-    const handleVolumeChange = (event, newValue) => {
-        setVolume(newValue);
+    const handleModelChange = (event, newValue) => {
+        setModel(newValue.props.value);
     };
 
     const handleNoiseCancelingChange = (event, newValue) => {
@@ -328,11 +430,12 @@ function EchoTranscript() {
         });
     };
 
+
     return (
         <Container component="main" sx={{ mb: 4 }}>
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6} sx={{ display: 'grid', gap: 2 }} id="controls">
+                    <Grid item xs={12} sm={4} sx={{ display: 'grid', gap: 2 }} id="controls">
                         <Box sx={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -345,11 +448,29 @@ function EchoTranscript() {
 
                         <Box align="center">
                             <FormControl component="fieldset" variant="standard" align='left'>
-                            <LanguageSelect
+                                <FormControl variant="standard" sx={{ mb: 1 }}>
+                                    <InputLabel id="model-select-label" variant="standard">Model</InputLabel>
+                                    <Select
+                                        labelId="model-select-label"
+                                        id="model-select"
+                                        label="Model"
+                                        onChange={handleModelChange}
+                                        disabled={playing}
+                                        value={model}
+                                    >
+                                        <MenuItem value="text-ada-001">text-ada-001</MenuItem>
+                                        <MenuItem value="text-babbage-001">text-babbage-001</MenuItem>
+                                        <MenuItem value="text-curie-001">text-curie-001</MenuItem>
+                                        <MenuItem value="text-davinci-003">text-davinci-003</MenuItem>
+                                    </Select>
+                                </FormControl>
+                                <FormControl variant="standard">
+                                    <LanguageSelect
                                         onChange={handleLanguageChange}
                                         disabled={playing}
                                         value={language}
                                     />
+                                </FormControl>
                                 <FormGroup>
                                     <FormControlLabel
                                         control={
@@ -365,30 +486,30 @@ function EchoTranscript() {
                                         label="Auto Gain Control"
                                         disabled={playing}
                                     />
-                                    <Stack spacing={2} direction="row" alignItems="center">
-                                        {
-                                            volume ? (<VolumeDown sx={{ color: playing ? grey[500] : '' }} disabled={!playing} />) : (<VolumeOff sx={{ color: playing ? grey[500] : '' }} disabled={!playing} />)
-                                        }
-                                        <Slider
-                                            aria-label="Volume"
-                                            value={volume}
-                                            onChange={handleVolumeChange}
-                                            disabled={playing}
-                                            valueLabelDisplay='auto'
-                                            min={0}
-                                            max={10}
-                                            sx={{ minWidth: 50 }}
-                                        />
-                                        <VolumeUp sx={{ color: playing || !volume ? grey[500] : '' }} disabled={!playing} />
-                                    </Stack>
                                 </FormGroup>
                             </FormControl>
                         </Box>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <Card raised sx={{
-                            p: 2
-                        }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                    <Grid item xs={12} sm={4}>
+                        <Typography variant="caption">You:</Typography>
+                        <Card raised sx={{ p: 2, bgcolor: '#f0faed' }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                        <Typography variant="caption">chatGPT:</Typography>
+                        <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
+                    </Grid>
+                    <Grid item xs={12} sm={12}>
+                        <TextField
+                            id="text-input"
+                            label="Chat History"
+                            variant="outlined"
+                            multiline
+                            sx={{ width: '100%' }}
+                            rows={4}
+                            value={chatHistory.join('\n')}
+                            inputRef={textFieldRef}
+                        />
+                        <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
                     </Grid>
                 </Grid>
             </Paper>
@@ -396,4 +517,4 @@ function EchoTranscript() {
     );
 }
 
-export default EchoTranscript;
+export default TalkGPT;

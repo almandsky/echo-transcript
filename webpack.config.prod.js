@@ -24,10 +24,10 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: "[name].[contenthash].css"
     }),
-
     new webpack.DefinePlugin({
       // This global makes sure React is built in prod mode.
-      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV)
+      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+      "process.env.OPENAI_API_KEY": JSON.stringify(process.env.OPENAI_API_KEY)
     }),
     new HtmlWebpackPlugin({
       template: "src/index.html",
@@ -79,6 +79,20 @@ module.exports = {
           handler: 'StaleWhileRevalidate',
           options: {
             cacheName: 'js-cache',
+          },
+        },
+        {
+          urlPattern: /talkgpt/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'html-cache',
+          },
+        },
+        {
+          urlPattern: /about/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'html-cache',
           },
         },
         {
