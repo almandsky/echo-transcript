@@ -82,7 +82,9 @@ function TalkGPT() {
 
         newPromptArray.push(HUMAN_PREFIX + textToRead);
 
-        const newPrompt = newPromptArray.join('\n');
+        const newPrompt = newPromptArray.length > 5
+            ? newPromptArray.slice(-5).join('\n')
+            : newPromptArray.join('\n');
 
         setAnswering(true);
         const token = process.env.OPENAI_API_KEY;
