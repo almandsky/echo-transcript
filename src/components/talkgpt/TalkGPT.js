@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Checkbox from '@mui/material/Checkbox';
-import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 
 
@@ -20,7 +19,6 @@ import Select from "@mui/material/Select";
 import Slider from '@mui/material/Slider';
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 
 
 import VolumeDown from "@mui/icons-material/VolumeDown";
@@ -60,7 +58,6 @@ function TalkGPT() {
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [volume, setVolume] = useState(0);
-    const [voices, setVoices] = useState(null);
     const [model, setModel] = useState('text-davinci-003');
 
     const [chatHistory, setChatHistory] = useState([
@@ -82,16 +79,13 @@ function TalkGPT() {
 
 
     const handleButtonClick = async () => {
-        if (!voices || !voices.length) {
-            const supportedVoices = window.speechSynthesis.getVoices();
-            setVoices(supportedVoices);
-            console.log('sky debug 2001 supportedVoices are: ', supportedVoices);
-            console.log('sky debug 2002 supportedVoices are: ', voices);
-        }
+        const supportedVoices = window.speechSynthesis.getVoices();
 
         const transcriptDiv = document.querySelector('#transcript-div');
         const answerDiv = document.querySelector('#answer-div');
         const textToRead = transcriptDiv.innerHTML;
+
+        console.log('sky debug 4000 synth is ', synth);
 
 
         if (!textToRead) {
@@ -140,7 +134,7 @@ function TalkGPT() {
 
         const utterance = new SpeechSynthesisUtterance(textToDisplay);
         // utterance.lang = language;
-        utterance.voice = voices.find((voice) => voice.lang === language);
+        utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         utterance.rate = 0.9;
         synth.speak(utterance);
 
@@ -205,6 +199,7 @@ function TalkGPT() {
         if (speechRecognition) {
             speechRecognition.onresult = (event) => {
                 const transcriptDiv = document.querySelector('#transcript-div');
+                const answerDiv = document.querySelector('#answer-div');
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const result = event.results[i];
                     if (result.isFinal) {
@@ -230,6 +225,7 @@ function TalkGPT() {
                         ])
                         typeMessage(transcriptDiv, message, async () => {
                             transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+                            answerDiv.innerHTML = '';
                             await handleButtonClick();
                         });
                     } else {
@@ -345,9 +341,6 @@ function TalkGPT() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const synthesis = window.speechSynthesis;
 
-        const supportedVoices = window.speechSynthesis.getVoices();
-        setVoices(supportedVoices);
-
         let recognition;
         let tempWakeLockSupported;
         if (SpeechRecognition) {
@@ -426,13 +419,6 @@ function TalkGPT() {
     };
 
     const handleLanguageChange = (event, newValue) => {
-        console.log('sky debug 2000 voices are: ', voices);
-        if (!voices || !voices.length) {
-            const supportedVoices = window.speechSynthesis.getVoices();
-            setVoices(supportedVoices);
-            console.log('sky debug 2001 supportedVoices are: ', supportedVoices);
-            console.log('sky debug 2002 voices are: ', voices);
-        }
         setState({
             ...state,
             language: newValue.props.value
