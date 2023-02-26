@@ -78,7 +78,7 @@ function TalkGPT() {
     }, [textFieldRef.current?.value]);
 
 
-    const handleButtonClick = async () => {
+    const processAnswer = async () => {
         const supportedVoices = window.speechSynthesis.getVoices();
 
         const transcriptDiv = document.querySelector('#transcript-div');
@@ -140,6 +140,16 @@ function TalkGPT() {
 
         setAnswering(false);
         transcriptDiv.innerHTML = '';
+    };
+
+    const handleOnclickTest = () => {
+        const supportedVoices = window.speechSynthesis.getVoices();
+        const answerDiv = document.querySelector('#answer-div');
+        const utterance = new SpeechSynthesisUtterance(answerDiv.innerHTML);
+        // utterance.lang = language;
+        utterance.voice = supportedVoices.find((voice) => voice.lang === language);
+        utterance.rate = 0.9;
+        synth.speak(utterance);
     };
 
     function typeMessage(element, message, callback) {
@@ -226,7 +236,7 @@ function TalkGPT() {
                         typeMessage(transcriptDiv, message, async () => {
                             transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
                             answerDiv.innerHTML = '';
-                            await handleButtonClick();
+                            await processAnswer();
                         });
                     } else {
                         setThinking(true);
@@ -541,6 +551,7 @@ function TalkGPT() {
                             // onChange={handleInputChange}
                             inputRef={textFieldRef}
                         />
+                        <Button onClick={handleOnclickTest}>test answer</Button>
                     </Grid>
                 </Grid>
             </Paper>
