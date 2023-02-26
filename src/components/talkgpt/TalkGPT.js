@@ -61,7 +61,7 @@ function TalkGPT() {
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [volume, setVolume] = useState(0);
     const [voices, setVoices] = useState(null);
-    const [model, setModel] = useState('text-ada-001');
+    const [model, setModel] = useState('text-davinci-003');
 
     const [chatHistory, setChatHistory] = useState([
         // '\nHuman:\n\nhow are you?',
@@ -129,7 +129,7 @@ function TalkGPT() {
         newPromptArray.push(answerText);
         
 
-        const textToDisplay = answerText.replace(/^\nAI:\n\n/, '');
+        const textToDisplay = answerText.slice(answerText.indexOf(':') + 1);
 
         console.log('sky debug 1003 textToDisplay are: ', textToDisplay);
 
