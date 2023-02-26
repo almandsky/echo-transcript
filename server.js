@@ -6,6 +6,12 @@ const app = express();
 
 app.use(compression());
 
+// output the console log
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${res.statusMessage}`);
+  next();
+});
+
 // Serve static assets
 app.use(express.static(path.join(__dirname, 'build')));
 

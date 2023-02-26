@@ -79,8 +79,6 @@ function TalkGPT() {
 
 
     const processAnswer = async () => {
-        const supportedVoices = window.speechSynthesis.getVoices();
-
         const transcriptDiv = document.querySelector('#transcript-div');
         const answerDiv = document.querySelector('#answer-div');
         const textToRead = transcriptDiv.innerHTML;
@@ -134,7 +132,6 @@ function TalkGPT() {
 
         const utterance = new SpeechSynthesisUtterance(textToDisplay);
         utterance.lang = language;
-        // utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         utterance.rate = 0.9;
         synth.speak(utterance);
 
@@ -147,7 +144,6 @@ function TalkGPT() {
         const answerDiv = document.querySelector('#answer-div');
         const utterance = new SpeechSynthesisUtterance(answerDiv.innerHTML);
         utterance.lang = language;
-        // utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         utterance.rate = 0.9;
         synth.speak(utterance);
     };
