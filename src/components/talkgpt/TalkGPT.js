@@ -16,16 +16,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
-import Slider from '@mui/material/Slider';
-import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-
-
-import VolumeDown from "@mui/icons-material/VolumeDown";
-import VolumeOff from "@mui/icons-material/VolumeOff";
-import VolumeUp from "@mui/icons-material/VolumeUp";
-
-import { grey } from '@mui/material/colors';
 
 import LanguageSelect from '../common/LanguageSelect';
 
@@ -50,14 +41,12 @@ function TalkGPT() {
 
     const [playing, setPlaying] = useState(false);
     const [localStream, setStream] = useState(null);
-    const [audioContext, setAudioContext] = useState(null);
     const [speechRecognition, setRecognition] = useState(null);
     const [synth, setSynth] = useState(null);
     const [thinking, setThinking] = useState(false);
     const [answering, setAnswering] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
-    const [volume, setVolume] = useState(0);
     const [model, setModel] = useState('text-davinci-003');
 
     const [chatHistory, setChatHistory] = useState([
@@ -327,10 +316,6 @@ function TalkGPT() {
             }
         });
 
-        if (audioContext) {
-            audioContext.close();
-        }
-
 
         if (wakeLockSupported && wakeLock) {
             wakeLock.release()
@@ -375,26 +360,6 @@ function TalkGPT() {
         }
     }, [language]);
 
-    const playWithDelay = (stream) => {
-        let context;
-        try {
-            context = new AudioContext();
-            const source = context.createMediaStreamSource(stream);
-            const volumeValue = parseInt(volume, 10);
-
-            const gainNode = context.createGain();
-            gainNode.gain.setValueAtTime(volumeValue, context.currentTime);
-
-            source.connect(gainNode);
-            gainNode.connect(context.destination);
-
-        } catch (err) {
-            console.log(`playWithDelay error detected: ${err}`);
-        }
-
-        setAudioContext(audioContext);
-    };
-
     // playing status changed
     useEffect(async () => {
         // based on is playing or not, either start the audio or stop.
@@ -433,10 +398,6 @@ function TalkGPT() {
 
     const handleModelChange = (event, newValue) => {
         setModel(newValue.props.value);
-    };
-
-    const handleVolumeChange = (event, newValue) => {
-        setVolume(newValue);
     };
 
     const handleNoiseCancelingChange = (event, newValue) => {
@@ -509,22 +470,6 @@ function TalkGPT() {
                                         label="Auto Gain Control"
                                         disabled={playing}
                                     />
-                                    <Stack spacing={2} direction="row" alignItems="center">
-                                        {
-                                            volume ? (<VolumeDown sx={{ color: playing ? grey[500] : '' }} disabled={!playing} />) : (<VolumeOff sx={{ color: playing ? grey[500] : '' }} disabled={!playing} />)
-                                        }
-                                        <Slider
-                                            aria-label="Volume"
-                                            value={volume}
-                                            onChange={handleVolumeChange}
-                                            disabled={playing}
-                                            valueLabelDisplay='auto'
-                                            min={0}
-                                            max={10}
-                                            sx={{ minWidth: 50 }}
-                                        />
-                                        <VolumeUp sx={{ color: playing || !volume ? grey[500] : '' }} disabled={!playing} />
-                                    </Stack>
                                 </FormGroup>
                             </FormControl>
                         </Box>
