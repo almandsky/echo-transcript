@@ -128,13 +128,16 @@ function TalkGPT() {
         transcriptDiv.innerHTML = '';
     };
 
-    const handleOnclickTest = () => {
-        // const supportedVoices = window.speechSynthesis.getVoices();
-        const answerDiv = document.querySelector('#answer-div');
-        const utterance = new SpeechSynthesisUtterance(answerDiv.innerHTML);
+    const testSpeech = (message) => {
+        const utterance = new SpeechSynthesisUtterance(message);
         utterance.lang = language;
         utterance.rate = 0.9;
         synth.speak(utterance);
+    };
+
+    const handleOnclickTest = () => {
+        const answerDiv = document.querySelector('#answer-div');
+        testSpeech(answerDiv.innerHTML);
     };
 
     function typeMessage(element, message, callback) {
@@ -374,10 +377,12 @@ function TalkGPT() {
 
 
     const handleStartClick = async () => {
+        testSpeech('Let\'s start!');
         setPlaying(true);
     };
 
     const handleStopClick = () => {
+        testSpeech('Stop');
         setPlaying(false);
     };
 
