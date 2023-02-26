@@ -82,6 +82,20 @@ module.exports = {
           },
         },
         {
+          urlPattern: /talkgpt/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'html-cache',
+          },
+        },
+        {
+          urlPattern: /about/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'html-cache',
+          },
+        },
+        {
           urlPattern: /index\.html/,
           handler: 'StaleWhileRevalidate',
           options: {
