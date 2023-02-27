@@ -504,11 +504,11 @@ function TalkGPT() {
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Typography variant="caption">You:</Typography>
+                        <Typography variant="caption">You said:</Typography>
                         <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={4}>
-                        <Typography variant="caption">chatGPT:</Typography>
+                        <Typography variant="caption">chatGPT said:</Typography>
                         <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
