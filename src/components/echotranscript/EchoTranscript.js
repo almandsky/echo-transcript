@@ -399,7 +399,7 @@ function EchoTranscript() {
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={8}>
-                        <Typography variant="caption">You:</Typography>
+                        <Typography variant="caption">You said:</Typography>
                         <Card raised sx={{
                             p: 2
                         }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
