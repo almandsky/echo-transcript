@@ -14,6 +14,8 @@ import Grid from '@mui/material/Grid';
 import Paper from "@mui/material/Paper";
 import Slider from '@mui/material/Slider';
 import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+
 
 import VolumeDown from "@mui/icons-material/VolumeDown";
 import VolumeOff from "@mui/icons-material/VolumeOff";
@@ -397,6 +399,7 @@ function EchoTranscript() {
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={8}>
+                        <Typography variant="caption">You:</Typography>
                         <Card raised sx={{
                             p: 2
                         }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>

@@ -505,7 +505,7 @@ function TalkGPT() {
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <Typography variant="caption">You:</Typography>
-                        <Card raised sx={{ p: 2, bgcolor: '#f0faed' }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <Typography variant="caption">chatGPT:</Typography>
