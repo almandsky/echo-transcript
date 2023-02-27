@@ -14,6 +14,8 @@ import Grid from '@mui/material/Grid';
 import Paper from "@mui/material/Paper";
 import Slider from '@mui/material/Slider';
 import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+
 
 import VolumeDown from "@mui/icons-material/VolumeDown";
 import VolumeOff from "@mui/icons-material/VolumeOff";
@@ -343,7 +345,7 @@ function EchoTranscript() {
         <Container component="main" sx={{ mb: 4 }}>
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6} sx={{ display: 'grid', gap: 2 }} id="controls">
+                    <Grid item xs={12} sm={4} sx={{ display: 'grid', gap: 2 }} id="controls">
                         <Box sx={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -396,7 +398,8 @@ function EchoTranscript() {
                             </FormControl>
                         </Box>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={8}>
+                        <Typography variant="caption">You:</Typography>
                         <Card raised sx={{
                             p: 2
                         }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>

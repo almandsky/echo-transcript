@@ -461,22 +461,6 @@ function TalkGPT() {
 
                         <Box align="center">
                             <FormControl component="fieldset" variant="standard" align='left'>
-                                <FormControl variant="standard" sx={{ mb: 1 }}>
-                                    <InputLabel id="model-select-label" variant="standard">Model</InputLabel>
-                                    <Select
-                                        labelId="model-select-label"
-                                        id="model-select"
-                                        label="Model"
-                                        onChange={handleModelChange}
-                                        disabled={playing}
-                                        value={model}
-                                    >
-                                        <MenuItem value="text-ada-001">text-ada-001</MenuItem>
-                                        <MenuItem value="text-babbage-001">text-babbage-001</MenuItem>
-                                        <MenuItem value="text-curie-001">text-curie-001</MenuItem>
-                                        <MenuItem value="text-davinci-003">text-davinci-003</MenuItem>
-                                    </Select>
-                                </FormControl>
                                 <FormControl variant="standard">
                                     <LanguageSelect
                                         onChange={handleLanguageChange}
@@ -500,12 +484,28 @@ function TalkGPT() {
                                         disabled={playing}
                                     />
                                 </FormGroup>
+                                <FormControl variant="standard" sx={{ mb: 1 }}>
+                                    <InputLabel id="model-select-label" variant="standard">Model</InputLabel>
+                                    <Select
+                                        labelId="model-select-label"
+                                        id="model-select"
+                                        label="Model"
+                                        onChange={handleModelChange}
+                                        disabled={playing}
+                                        value={model}
+                                    >
+                                        <MenuItem value="text-ada-001">text-ada-001</MenuItem>
+                                        <MenuItem value="text-babbage-001">text-babbage-001</MenuItem>
+                                        <MenuItem value="text-curie-001">text-curie-001</MenuItem>
+                                        <MenuItem value="text-davinci-003">text-davinci-003</MenuItem>
+                                    </Select>
+                                </FormControl>
                             </FormControl>
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <Typography variant="caption">You:</Typography>
-                        <Card raised sx={{ p: 2, bgcolor: '#f0faed' }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <Typography variant="caption">chatGPT:</Typography>
