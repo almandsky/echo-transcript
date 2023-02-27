@@ -13,7 +13,7 @@ const AboutPage = () => (
             </Typography>
             <Typography variant="h5" component='h2' sx={{ m: 1 }}>Talk to chatGPT</Typography>
             <Typography component='p' sx={{ m: 1 }}>
-                For the <Link href="https://skychen.com/talkgpt">Talk to chatGPT</Link>feature, your spoken words are first transcribed using the <Link href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API">Web Speech API</Link>. The app then leverages the <Link href="https://openai.com/api/">openAI API</Link> to generate a response to your question, which is then read aloud to you using the <Link href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis">SpeechSynthesis API</Link> Essentially, you can have a conversation with chatGPT by simply speaking to it!
+                For the <Link href="https://skychen.com/talkgpt">Talk to chatGPT</Link> feature, your spoken words are first transcribed using the <Link href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API">Web Speech API</Link>. The app then leverages the <Link href="https://openai.com/api/">openAI API</Link> to generate a response to your question, which is then read aloud to you using the <Link href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis">SpeechSynthesis API</Link> Essentially, you can have a conversation with chatGPT by simply speaking to it!
             </Typography>
             <Typography variant="h5" component='h2' sx={{ m: 1 }}>Talk to yourself</Typography>
             <Typography component='p' sx={{ m: 1 }}>
