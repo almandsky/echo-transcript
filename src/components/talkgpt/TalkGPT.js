@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Prompt } from 'react-router-dom';
 import axios from 'axios';
 
 import Box from '@mui/material/Box';
@@ -174,6 +175,11 @@ function TalkGPT() {
     }
 
     const startProcess = async () => {
+        window?.gtag('event', 'starttalk', {
+            'event_category': 'talkgpt',
+            'event_label': 'Start Talk to chatGPT',
+            language
+        });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
             navigator.mediaDevices.enumerateDevices()
@@ -319,6 +325,11 @@ function TalkGPT() {
     };
 
     const stopProcess = () => {
+        window?.gtag('event', 'stoptalk', {
+            'event_category': 'talkgpt',
+            'event_label': 'Stop Talk to chatGPT',
+            language
+        });
         if (speechRecognition) {
             speechRecognition.stop();
         }
@@ -514,6 +525,17 @@ function TalkGPT() {
                         <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
                     </Grid>
                 </Grid>
+                <Prompt
+                        when={playing}
+                        // message="Are you sure you want to leave this page? Your microphone is still being used."
+                        message={(location) => {
+                            if (location.pathname === '/talkgpt') {
+                                return true;
+                            }
+                            stopProcess();
+                            return ('The Talk to chatGPT is stop when you navigate to other page.');
+                        }}
+                    />
             </Paper>
         </Container>
     );

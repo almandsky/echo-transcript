@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Prompt } from 'react-router-dom';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -64,6 +65,11 @@ function EchoTranscript() {
     }
 
     const startProcess = async () => {
+        window?.gtag('event', 'startecho', {
+            'event_category': 'echotranscript',
+            'event_label': 'Start Echo Transcript',
+            language
+        });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
             navigator.mediaDevices.enumerateDevices()
@@ -224,6 +230,11 @@ function EchoTranscript() {
         }
 
         setThinking(false);
+        window?.gtag('event', 'stopecho', {
+            'event_category': 'echotranscript',
+            'event_label': 'Stop Echo Transcript',
+            language
+        });
     };
 
     // componentDidMount
@@ -390,6 +401,17 @@ function EchoTranscript() {
                             p: 2
                         }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
                     </Grid>
+                    <Prompt
+                        when={playing}
+                        // message="Are you sure you want to leave this page? Your microphone is still being used."
+                        message={(location) => {
+                            if (location.pathname === '/') {
+                                return true;
+                            }
+                            stopProcess();
+                            return ('The Echo Transcript is stop when you navigate to other page.');
+                        }}
+                    />
                 </Grid>
             </Paper>
         </Container>
