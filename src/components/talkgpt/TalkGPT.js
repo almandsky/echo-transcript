@@ -102,6 +102,13 @@ function TalkGPT() {
             ? newPromptArray.slice(-5).join('\n')
             : newPromptArray.join('\n');
 
+        window?.gtag('event', 'call_openai_start', {
+            'event_category': 'talkgpt',
+            'event_label': 'Making API call to openAI',
+            'prompt_length': newPrompt.length,
+            language
+        });
+
         setAnswering(true);
         const response = await axios.post(AI_ENDPOINT, {
             "model": model,
@@ -117,6 +124,13 @@ function TalkGPT() {
         const answerText = response.data;
 
         newPromptArray.push(answerText);
+
+        window?.gtag('event', 'call_openai_completed', {
+            'event_category': 'talkgpt',
+            'event_label': 'Received API response from openAI',
+            'answer_length': answerText.length,
+            language
+        });
         
         const textToDisplay = truncateText(answerText);
 
