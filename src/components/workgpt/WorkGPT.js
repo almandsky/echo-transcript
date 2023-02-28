@@ -21,6 +21,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
+import workTemplates from './workTemplates';
 
 const HUMAN_PREFIX = 'Human:';
 const AI_PREFIX = 'AI:';
@@ -29,7 +30,7 @@ const AI_ENDPOINT = process.env.NODE_ENV === 'production'
     ? '/completions'
     : 'http://localhost:3001/completions';
 
-function TalkGPT() {
+function WorkGPT() {
 
     const [state, setState] = useState({
         language: 'en-US',
@@ -54,6 +55,13 @@ function TalkGPT() {
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [model, setModel] = useState('text-davinci-003');
+
+    const [selectedTemplate, setSelectedTemplate] = useState('Analytics Copilot');
+    const [currentWorkContext, setCurrentWorkContext] = useState('');
+    const [currentActions, setCurrentActions] = useState([]);
+    const [suggestedAction, setSuggestedAction] = useState(null);
+
+
 
     const [chatHistory, setChatHistory] = useState([]);
 
@@ -111,12 +119,12 @@ function TalkGPT() {
         setAnswering(true);
         const response = await axios.post(AI_ENDPOINT, {
             "model": model,
-            "prompt": newPrompt,
-            "temperature": 0.5,
-            "max_tokens": 255,
+            "prompt": currentWorkContext + '\n\n' + newPrompt,
+            "temperature": 0.1,
+            "max_tokens": 500,
             "top_p": 1,
-            "frequency_penalty": 0.5,
-            "presence_penalty": 0.5,
+            "frequency_penalty": 0.2,
+            "presence_penalty": 0.2,
             "stop": [`${HUMAN_PREFIX}`, `${AI_PREFIX}`]
         });
 
@@ -398,6 +406,8 @@ function TalkGPT() {
         setRecognition(recognition);
         setSynth(synthesis);
         setWakeLockSupported(tempWakeLockSupported);
+
+        updateTemplateRelatedInfo(selectedTemplate);
         // based on is playing or not, either start the audio or stop.
     }, []);
 
@@ -435,6 +445,7 @@ function TalkGPT() {
         transcriptDiv.innerHTML = '';
         answerDiv.innerHTML = '';
         setChatHistory([]);
+        updateTemplateRelatedInfo(selectedTemplate);
     };
 
     const handleLanguageChange = (event, newValue) => {
@@ -447,6 +458,25 @@ function TalkGPT() {
     const handleModelChange = (event, newValue) => {
         setModel(newValue.props.value);
     };
+
+    const updateTemplateRelatedInfo = (templateName) => {
+        const template = workTemplates[templateName];
+        if (!template) {
+            return;
+        }
+        const { workContext, actions } = template;
+
+        setCurrentWorkContext(workContext);
+        setCurrentActions(actions);
+    }
+
+    const handleTemplateChange = (event, newValue) => {
+        setSelectedTemplate(newValue.props.value);
+
+        // update the actions list and context as well.
+        updateTemplateRelatedInfo(newValue.props.value);
+    };
+    
 
     const handleNoiseCancelingChange = (event, newValue) => {
         setState({
@@ -503,7 +533,7 @@ function TalkGPT() {
                                         disabled={playing}
                                     />
                                 </FormGroup>
-                                <FormControl variant="standard">
+                                <FormControl variant="standard" sx={{ mb: 1 }}>
                                     <InputLabel id="model-select-label" variant="standard">Model</InputLabel>
                                     <Select
                                         labelId="model-select-label"
@@ -519,8 +549,38 @@ function TalkGPT() {
                                         <MenuItem value="text-davinci-003">text-davinci-003</MenuItem>
                                     </Select>
                                 </FormControl>
+                                <FormControl variant="standard">
+                                    <InputLabel id="template-select-label" variant="standard">Work Template</InputLabel>
+                                    <Select
+                                        labelId="template-select-label"
+                                        id="template-select"
+                                        label="Work Template"
+                                        onChange={handleTemplateChange}
+                                        disabled={playing}
+                                        value={selectedTemplate}
+                                    >
+                                        {
+                                            Object.keys(workTemplates).map(((workTemplateKey) => {
+                                                return (
+                                                <MenuItem key={workTemplateKey} value={workTemplateKey}>{workTemplateKey}</MenuItem>
+                                                )
+                                            }))
+                                        }
+                                    </Select>
+                                </FormControl>
                             </FormControl>
                         </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={12}>
+                        <TextField
+                            id="context-input"
+                            label="Work Context"
+                            variant="outlined"
+                            multiline
+                            sx={{ width: '100%' }}
+                            rows={4}
+                            value={currentWorkContext}
+                        />
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <Typography variant="caption">You said:</Typography>
@@ -560,4 +620,4 @@ function TalkGPT() {
     );
 }
 
-export default TalkGPT;
+export default WorkGPT;

@@ -7,6 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Header from './common/Header';
 import EchoTranscript from './echotranscript/EchoTranscript';
 import TalkGPT from './talkgpt/TalkGPT';
+import WorkGPT from './workgpt/WorkGPT';
 import AboutPage from './about/About';
 import PageNotFound from './PageNotFound';
 
@@ -61,6 +62,7 @@ function App() {
       <Switch>
         <Route exact path="/" component={EchoTranscript} />
         <Route exact path="/talkgpt" component={TalkGPT} />
+        <Route exact path="/workgpt" component={WorkGPT} />
         <Route path="/about" component={AboutPage} />
         <Route component={PageNotFound} />
       </Switch>
