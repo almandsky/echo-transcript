@@ -431,6 +431,7 @@ function TalkGPT() {
 
     const handleStopClick = () => {
         setPlaying(false);
+        setAnswering(false);
     };
 
     const handleResetClick = () => {
