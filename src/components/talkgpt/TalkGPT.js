@@ -106,7 +106,7 @@ function TalkGPT() {
             'event_category': 'openai_api',
             'event_label': 'Making API call to openAI',
             'value': newPrompt.length,
-            language
+            'language': language
         });
 
         setAnswering(true);
@@ -129,7 +129,7 @@ function TalkGPT() {
             'event_category': 'openai_api',
             'event_label': 'Received API response from openAI',
             'value': answerText.length,
-            language
+            'language': language
         });
         
         const textToDisplay = truncateText(answerText);
@@ -201,7 +201,7 @@ function TalkGPT() {
         window?.gtag('event', 'starttalk', {
             'event_category': 'talkgpt',
             'event_label': 'Start Talk to chatGPT',
-            language
+            'language': language
         });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
@@ -351,7 +351,7 @@ function TalkGPT() {
         window?.gtag('event', 'stoptalk', {
             'event_category': 'talkgpt',
             'event_label': 'Stop Talk to chatGPT',
-            language
+            'language': language
         });
         if (speechRecognition) {
             speechRecognition.stop();

@@ -70,7 +70,7 @@ function EchoTranscript() {
         window?.gtag('event', 'startecho', {
             'event_category': 'echotranscript',
             'event_label': 'Start Echo Transcript',
-            language
+            'language': language
         });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
@@ -235,7 +235,7 @@ function EchoTranscript() {
         window?.gtag('event', 'stopecho', {
             'event_category': 'echotranscript',
             'event_label': 'Stop Echo Transcript',
-            language
+            'language': language
         });
     };
 
