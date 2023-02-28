@@ -69,6 +69,26 @@ function TalkGPT() {
     }, [textFieldRef.current?.value]);
 
 
+    const truncateText = (inputText) => {
+        if (!inputText) {
+            return inputText;
+        }
+
+        let truncatedText = '';
+        let posComma = inputText.indexOf(':');
+        let posCommaNonASCII = inputText.indexOf('：');
+
+        if (posComma >=0 && posComma < 10) {
+            truncatedText = inputText.slice(posComma + 1);
+        } else if (posCommaNonASCII >=0 && posCommaNonASCII < 10) {
+            truncatedText = inputText.slice(posCommaNonASCII + 1);
+        } else {
+            truncatedText = inputText;
+        }
+
+        return truncatedText;
+    }
+
     const processAnswer = async () => {
         const supportedVoices = window.speechSynthesis.getVoices();
         const transcriptDiv = document.querySelector('#transcript-div');
@@ -109,7 +129,7 @@ function TalkGPT() {
 
         newPromptArray.push(answerText);
         
-        const textToDisplay = answerText.slice(answerText.indexOf(':') + 1).slice(answerText.indexOf('：') + 1);
+        const textToDisplay = truncateText(answerText);
 
         typeMessage(answerDiv, textToDisplay, () => {
             answerDiv.scrollTop = answerDiv.scrollHeight;
