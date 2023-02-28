@@ -103,7 +103,7 @@ function TalkGPT() {
             : newPromptArray.join('\n');
 
         window?.gtag('event', 'call_openai_start', {
-            'event_category': 'talkgpt',
+            'event_category': 'openai_api',
             'event_label': 'Making API call to openAI',
             'value': newPrompt.length,
             language
@@ -126,7 +126,7 @@ function TalkGPT() {
         newPromptArray.push(answerText);
 
         window?.gtag('event', 'call_openai_completed', {
-            'event_category': 'talkgpt',
+            'event_category': 'openai_api',
             'event_label': 'Received API response from openAI',
             'value': answerText.length,
             language
