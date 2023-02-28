@@ -68,9 +68,8 @@ function EchoTranscript() {
 
     const startProcess = async () => {
         window?.gtag('event', 'startecho', {
-            'event_category': 'echotranscript',
-            'event_label': 'Start Echo Transcript',
-            'language': language
+            'event_category': language,
+            'event_label': 'Start Echo Transcript'
         });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
@@ -233,9 +232,8 @@ function EchoTranscript() {
 
         setThinking(false);
         window?.gtag('event', 'stopecho', {
-            'event_category': 'echotranscript',
-            'event_label': 'Stop Echo Transcript',
-            'language': language
+            'event_category': language,
+            'event_label': 'Stop Echo Transcript'
         });
     };
 

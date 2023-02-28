@@ -103,10 +103,9 @@ function TalkGPT() {
             : newPromptArray.join('\n');
 
         window?.gtag('event', 'call_openai_start', {
-            'event_category': 'openai_api',
+            'event_category': language,
             'event_label': 'Making API call to openAI',
-            'value': newPrompt.length,
-            'language': language
+            'value': newPrompt.length
         });
 
         setAnswering(true);
@@ -126,10 +125,9 @@ function TalkGPT() {
         newPromptArray.push(answerText);
 
         window?.gtag('event', 'call_openai_completed', {
-            'event_category': 'openai_api',
+            'event_category': language,
             'event_label': 'Received API response from openAI',
-            'value': answerText.length,
-            'language': language
+            'value': answerText.length
         });
         
         const textToDisplay = truncateText(answerText);
@@ -199,9 +197,8 @@ function TalkGPT() {
 
     const startProcess = async () => {
         window?.gtag('event', 'starttalk', {
-            'event_category': 'talkgpt',
-            'event_label': 'Start Talk to chatGPT',
-            'language': language
+            'event_category': language,
+            'event_label': 'Start Talk to chatGPT'
         });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
@@ -349,9 +346,8 @@ function TalkGPT() {
 
     const stopProcess = () => {
         window?.gtag('event', 'stoptalk', {
-            'event_category': 'talkgpt',
-            'event_label': 'Stop Talk to chatGPT',
-            'language': language
+            'event_category': language,
+            'event_label': 'Stop Talk to chatGPT'
         });
         if (speechRecognition) {
             speechRecognition.stop();
