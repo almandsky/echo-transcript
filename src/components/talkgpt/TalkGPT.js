@@ -73,9 +73,9 @@ function TalkGPT() {
         let posComma = inputText.indexOf(':');
         let posCommaNonASCII = inputText.indexOf('：');
 
-        if (posComma >=0 && posComma < 10) {
+        if (posComma >=0 && posComma <= 10) {
             truncatedText = inputText.slice(posComma + 1);
-        } else if (posCommaNonASCII >=0 && posCommaNonASCII < 10) {
+        } else if (posCommaNonASCII >=0 && posCommaNonASCII <= 10) {
             truncatedText = inputText.slice(posCommaNonASCII + 1);
         } else {
             truncatedText = inputText;
