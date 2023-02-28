@@ -105,7 +105,7 @@ function TalkGPT() {
         window?.gtag('event', 'call_openai_start', {
             'event_category': 'talkgpt',
             'event_label': 'Making API call to openAI',
-            'prompt_length': newPrompt.length,
+            'value': newPrompt.length,
             language
         });
 
@@ -128,7 +128,7 @@ function TalkGPT() {
         window?.gtag('event', 'call_openai_completed', {
             'event_category': 'talkgpt',
             'event_label': 'Received API response from openAI',
-            'answer_length': answerText.length,
+            'value': answerText.length,
             language
         });
         
