@@ -25,6 +25,10 @@ import LanguageSelect from '../common/LanguageSelect';
 const HUMAN_PREFIX = 'Human:';
 const AI_PREFIX = 'AI:';
 
+const AI_ENDPOINT = process.env.NODE_ENV === 'production'
+    ? '/completions'
+    : 'http://localhost:3001/completions';
+
 function TalkGPT() {
 
     const [state, setState] = useState({
@@ -51,16 +55,7 @@ function TalkGPT() {
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [model, setModel] = useState('text-davinci-003');
 
-    const [chatHistory, setChatHistory] = useState([
-        // '\nHuman:\n\nhow are you?',
-        // '\nAI:\n\nI am fine. How can I help you today?',
-        // 'AI: I am an AI created by OpenAI. How can I help you today?',
-        // 'Human: what do you like?',
-        // 'AI: I love exploring new ideas and helping people improve their lives. I especially like to focus on making technology that is easy to use and helpful for everyone.',
-        // 'Human: do you know what I like?',
-        // 'AI: I don\'t know exactly what you like, but I can make some suggestions based on what I know about you. What are some activities or topics that you usually enjoy?',
-        // 'Human: any things you can suggests to a 45 years old man?'
-    ]);
+    const [chatHistory, setChatHistory] = useState([]);
 
     const textFieldRef = useRef(null);
 
@@ -108,8 +103,7 @@ function TalkGPT() {
             : newPromptArray.join('\n');
 
         setAnswering(true);
-        const token = process.env.OPENAI_API_KEY;
-        const response = await axios.post('https://api.openai.com/v1/completions', {
+        const response = await axios.post(AI_ENDPOINT, {
             "model": model,
             "prompt": newPrompt,
             "temperature": 0.7,
@@ -118,14 +112,9 @@ function TalkGPT() {
             "frequency_penalty": 0,
             "presence_penalty": 0,
             "stop": [`${HUMAN_PREFIX}`, `${AI_PREFIX}`]
-        }, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
         });
 
-
-        const answerText = response.data.choices[0].text;
+        const answerText = response.data;
 
         newPromptArray.push(answerText);
         
