@@ -476,6 +476,12 @@ function WorkGPT() {
         // update the actions list and context as well.
         updateTemplateRelatedInfo(newValue.props.value);
     };
+
+    const handleWorkContextChange = (event, newValue) => {
+        setCurrentWorkContext(newValue);
+    };
+
+    
     
 
     const handleNoiseCancelingChange = (event, newValue) => {
@@ -580,6 +586,7 @@ function WorkGPT() {
                             sx={{ width: '100%' }}
                             rows={4}
                             value={currentWorkContext}
+                            onChange={handleWorkContextChange}
                         />
                     </Grid>
                     <Grid item xs={12} sm={4}>
