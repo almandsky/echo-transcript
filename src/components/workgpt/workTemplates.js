@@ -1,8 +1,6 @@
 const workTemplates = {
     'Analytics Copilot': {
         workContext: `
-API
-
 <Tables>:
 
 * TransactionTable: [tran_ID, date, customer, product, location, quantity, price]
@@ -54,80 +52,8 @@ Parameters:
             }
         }
     },
-    'Generate Report': {
-        workContext: `
-        
-        {
-            "reportMetadata": {
-              "aggregates": [
-                "RowCount"
-              ],
-              "chart": null,
-              "crossFilters": [],
-              "currency": null,
-              "dashboardSetting": null,
-              "description": null,
-              "detailColumns": [
-                "ROLLUP_DESCRIPTION",
-                "FULL_NAME",
-                "ACCOUNT_NAME",
-                "OPPORTUNITY_NAME",
-                "STAGE_NAME",
-                "FISCAL_QUARTER",
-                "AMOUNT",
-                "EXP_AMOUNT",
-                "PROBABILITY",
-                "AGE",
-                "CLOSE_DATE",
-                "CREATED_DATE",
-                "NEXT_STEP",
-                "LEAD_SOURCE",
-                "TYPE"
-              ],
-              "developerName": "<report_name>",
-              "division": null,
-              "folderId": "<folder_id>",
-              "groupingsAcross": [],
-              "groupingsDown": [],
-              "hasDetailRows": true,
-              "hasRecordCount": true,
-              "historicalSnapshotDates": [],
-              "name": "NewReport",
-              "presentationOptions": {
-                "hasStackedSummaries": true
-              },
-              "reportBooleanFilter": null,
-              "reportFilters": [],
-              "reportFormat": "TABULAR",
-              "reportType": {
-                "label": "Opportunities",
-                "type": "Opportunity"
-              },
-              "saveRoleHierarchy": false,
-              "scope": "organization",
-              "showGrandTotal": true,
-              "showSubtotals": true,
-              "sortBy": [],
-              "standardDateFilter": {
-                "column": "CLOSE_DATE",
-                "durationValue": "LAST_SIX_MONTHS"
-              },
-              "standardFilters": [
-                {
-                  "name": "open",
-                  "value": "all"
-                },
-                {
-                  "name": "probability",
-                  "value": ">0"
-                }
-              ],
-              "supportsRoleHierarchy": true,
-              "userOrHierarchyFilterId": null
-            }
-          }
-        
-        `,
+    'Others': {
+        workContext: ``,
         actions: {
             'Opportunity Report': {
                 description: 'Provide the reports to query the information related to Opportunities.',
