@@ -23,7 +23,11 @@ module.exports = {
     historyApiFallback: true,
     disableHostCheck: true,
     headers: { "Access-Control-Allow-Origin": "*" },
-    https: false
+    https: false,
+    proxy: {
+      '/completions': 'http://localhost:3001',
+      '/query': 'http://localhost:3001'
+  }
   },
   plugins: [
     new HtmlWebpackPlugin({

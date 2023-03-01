@@ -2,10 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 
+const { getSalesforceAuthToken, queryData } = require('../src/server/utils/SalesforceClient');
+
 require("dotenv").config();
 
-const { OPENAI_API_KEY } = process.env;
-
+const {
+    OPENAI_API_KEY
+} = process.env;
 
 const app = express();
 
@@ -34,8 +37,33 @@ app.post("/completions", async (req, res) => {
         res.send(responseData);
     } catch (err) {
         // Handle errors
-        console.error(err);
-        res.status(500).send(err);
+        console.error(err.message);
+        res.status(500).send(err.message);
+    }
+});
+
+app.post("/query", async (req, res) => {
+    console.log(`getting query ${req.body}`);
+    if (!req.body.query) {
+        console.error(`Empty Query!`);
+        res.status(500).send('Empty Query!');
+
+    } else {
+        let response = null;
+        const start = Date.now();
+        try {
+            const accessToken = await getSalesforceAuthToken();
+            const { query } = req.body;
+            const data = await queryData({ query, accessToken });
+            response = data;
+            res.send(response);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send(err.message);
+        }
+      
+        const msResponseTime = Date.now() - start;
+        console.log(`Received query response from in ${msResponseTime}`);
     }
 });
 

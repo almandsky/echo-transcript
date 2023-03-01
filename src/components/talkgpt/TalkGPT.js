@@ -25,9 +25,7 @@ import LanguageSelect from '../common/LanguageSelect';
 const HUMAN_PREFIX = 'Human:';
 const AI_PREFIX = 'AI:';
 
-const AI_ENDPOINT = process.env.NODE_ENV === 'production'
-    ? '/completions'
-    : 'http://localhost:3001/completions';
+const AI_ENDPOINT = '/completions';
 
 function TalkGPT() {
 

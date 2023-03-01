@@ -26,9 +26,7 @@ import workTemplates from './workTemplates';
 const HUMAN_PREFIX = 'Human:';
 const AI_PREFIX = 'AI:';
 
-const AI_ENDPOINT = process.env.NODE_ENV === 'production'
-    ? '/completions'
-    : 'http://localhost:3001/completions';
+const AI_ENDPOINT = '/completions';
 
 function WorkGPT() {
 
@@ -60,6 +58,13 @@ function WorkGPT() {
     const [currentWorkContext, setCurrentWorkContext] = useState('');
     const [currentActions, setCurrentActions] = useState([]);
     const [suggestedAction, setSuggestedAction] = useState(null);
+    const [soqlQuery, setSoqlQuery] = useState(`
+    SELECT city__c, sum(price__c) Revenue FROM Order__c
+    WHERE order_date__c > 2021-01-01 AND order_date__c <= 2021-01-31
+    GROUP BY city__c 
+    ORDER BY sum(price__c)
+    LIMIT 10
+  `);
 
 
 
@@ -81,9 +86,9 @@ function WorkGPT() {
         let posComma = inputText.indexOf(':');
         let posCommaNonASCII = inputText.indexOf('：');
 
-        if (posComma >=0 && posComma <= 10) {
+        if (posComma >= 0 && posComma <= 10) {
             truncatedText = inputText.slice(posComma + 1);
-        } else if (posCommaNonASCII >=0 && posCommaNonASCII <= 10) {
+        } else if (posCommaNonASCII >= 0 && posCommaNonASCII <= 10) {
             truncatedText = inputText.slice(posCommaNonASCII + 1);
         } else {
             truncatedText = inputText;
@@ -137,7 +142,7 @@ function WorkGPT() {
             'event_label': 'Received API response from openAI',
             'value': answerText.length
         });
-        
+
         const textToDisplay = truncateText(answerText);
 
         typeMessage(answerDiv, textToDisplay, () => {
@@ -149,7 +154,7 @@ function WorkGPT() {
         if (language !== 'en-US') {
             utterance.voice = supportedVoices.find((voice) => voice.lang === language);
         }
-        
+
         utterance.lang = language;
         utterance.rate = 0.9;
 
@@ -477,12 +482,12 @@ function WorkGPT() {
         updateTemplateRelatedInfo(newValue.props.value);
     };
 
-    const handleWorkContextChange = (event, newValue) => {
-        setCurrentWorkContext(newValue);
+    const handleWorkContextChange = (event) => {
+        setCurrentWorkContext(event.target.value);
     };
 
-    
-    
+
+
 
     const handleNoiseCancelingChange = (event, newValue) => {
         setState({
@@ -496,6 +501,28 @@ function WorkGPT() {
             ...state,
             autoGainControl: newValue
         });
+    };
+
+    const handleQueryChange = (event) => {
+        setSoqlQuery(event.target.value);
+    };
+
+
+    const handleQueryClick = () => {
+        genReport(soqlQuery);
+    };
+
+    const genReport = async (query) => {
+        if (!query) {
+            console.error('Empty query!');
+            return;
+        }
+
+        const response = await axios.post('/query', {
+            query
+        });
+
+        return response?.data;
     };
 
 
@@ -568,7 +595,7 @@ function WorkGPT() {
                                         {
                                             Object.keys(workTemplates).map(((workTemplateKey) => {
                                                 return (
-                                                <MenuItem key={workTemplateKey} value={workTemplateKey}>{workTemplateKey}</MenuItem>
+                                                    <MenuItem key={workTemplateKey} value={workTemplateKey}>{workTemplateKey}</MenuItem>
                                                 )
                                             }))
                                         }
@@ -576,6 +603,14 @@ function WorkGPT() {
                                 </FormControl>
                             </FormControl>
                         </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                        <Typography variant="caption">You said:</Typography>
+                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                        <Typography variant="caption">chatGPT said:</Typography>
+                        <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
                         <TextField
@@ -588,14 +623,6 @@ function WorkGPT() {
                             value={currentWorkContext}
                             onChange={handleWorkContextChange}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <Typography variant="caption">You said:</Typography>
-                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <Typography variant="caption">chatGPT said:</Typography>
-                        <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
                         <TextField
@@ -610,18 +637,31 @@ function WorkGPT() {
                         />
                         <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
                     </Grid>
+                    <Grid item xs={12} sm={12}>
+                        <TextField
+                            id="soql-input"
+                            label="SOQL Query"
+                            variant="outlined"
+                            multiline
+                            sx={{ width: '100%' }}
+                            rows={4}
+                            value={soqlQuery}
+                            onChange={handleQueryChange}
+                        />
+                        <Button onClick={handleQueryClick}>Gen Report</Button>
+                    </Grid>
                 </Grid>
                 <Prompt
-                        when={playing}
-                        // message="Are you sure you want to leave this page? Your microphone is still being used."
-                        message={(location) => {
-                            if (location.pathname === '/talkgpt') {
-                                return true;
-                            }
-                            stopProcess();
-                            return ('The Talk to chatGPT is stop when you navigate to other page.');
-                        }}
-                    />
+                    when={playing}
+                    // message="Are you sure you want to leave this page? Your microphone is still being used."
+                    message={(location) => {
+                        if (location.pathname === '/talkgpt') {
+                            return true;
+                        }
+                        stopProcess();
+                        return ('The Talk to chatGPT is stop when you navigate to other page.');
+                    }}
+                />
             </Paper>
         </Container>
     );
