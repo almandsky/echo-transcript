@@ -212,9 +212,9 @@ function WorkGPT() {
     }
 
     const startProcess = async () => {
-        window?.gtag('event', 'starttalk', {
+        window?.gtag('event', 'startwork', {
             'event_category': language,
-            'event_label': 'Start Talk to chatGPT'
+            'event_label': 'Start Work with chatGPT'
         });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
@@ -361,9 +361,9 @@ function WorkGPT() {
     };
 
     const stopProcess = () => {
-        window?.gtag('event', 'stoptalk', {
+        window?.gtag('event', 'stopwork', {
             'event_category': language,
-            'event_label': 'Stop Talk to chatGPT'
+            'event_label': 'Stop Work with chatGPT'
         });
         if (speechRecognition) {
             speechRecognition.stop();
@@ -514,7 +514,6 @@ function WorkGPT() {
     const handleQueryClick = async () => {
         const sourceData = await genReport(soqlQuery);
 
-        
         if (sourceData && sourceData.records && sourceData.records.length) {
             const { records } = sourceData;
             const firstRecord = records[0];
@@ -704,9 +703,7 @@ function WorkGPT() {
                         />
                         <Button onClick={handleQueryClick}>Gen Report</Button>
                     </Grid>
-                    <Grid item xs={12} sm={12} sx={{ height: 200, width: 200 }}>
-                        <BarChart data={chartData} />
-                    </Grid>
+                    <BarChart data={chartData} />
                 </Grid>
                 <Prompt
                     when={playing}

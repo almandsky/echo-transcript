@@ -1,35 +1,9 @@
 import React from 'react';
 import { Chart } from 'react-charts';
+import Grid from '@mui/material/Grid';
 
 const BarChart = ({ data }) => {
     console.log('sky debug 1001 data is ', data);
-    const formattedData = [
-        {
-            label: 'Revenue',
-            data: [
-                {
-                    primary: 'New York',
-                    secondary: 2535,
-                },
-                {
-                    primary: 'Chicago',
-                    secondary: 2919,
-                },
-                {
-                    primary: 'Guangzhou',
-                    secondary: 2996,
-                },
-                {
-                    primary: 'Beijing',
-                    secondary: 4627,
-                },
-                {
-                    primary: 'Los Angeles',
-                    secondary: 6488,
-                }
-            ]
-        }
-    ]
 
     const primaryAxis = React.useMemo(
         () => ({
@@ -49,13 +23,15 @@ const BarChart = ({ data }) => {
     )
 
     return (
-        data && <Chart
-            options={{
-                data,
-                primaryAxis,
-                secondaryAxes,
-            }}
-        />
+        data && <Grid item xs={12} sm={12} sx={{ height: 200 }}>
+            <Chart
+                options={{
+                    data,
+                    primaryAxis,
+                    secondaryAxes,
+                }}
+            />
+        </Grid>
     );
 }
 

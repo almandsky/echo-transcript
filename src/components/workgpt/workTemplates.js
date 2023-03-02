@@ -53,7 +53,47 @@ Parameters:
         }
     },
     'Others': {
-        workContext: ``,
+        workContext: `
+
+# Jobs to be done
+
+## Job 1
+
+### Description
+
+Job 1 is to run for 1 hour.
+
+### NextJob
+
+NextJob: Job 3
+
+Need to complete Job 1 first.
+
+## Job 2
+
+### Description
+
+Job 2 is to do 100 push ups.
+
+### NextJob
+
+NextJob: N/A
+
+All the jobs completed.
+
+## Job 3
+
+### Description
+
+Job 3 is to swim for 30 mins.
+
+### NextJob
+
+NextJob: Job 2
+
+Need to complete Job 1 and job 3 first.
+
+        `,
         actions: {
             'Opportunity Report': {
                 description: 'Provide the reports to query the information related to Opportunities.',
