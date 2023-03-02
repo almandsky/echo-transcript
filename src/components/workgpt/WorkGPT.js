@@ -22,6 +22,7 @@ import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
 import workTemplates from './workTemplates';
+import BarChart from '../charts/BarChart';
 
 const HUMAN_PREFIX = 'Human:';
 const AI_PREFIX = 'AI:';
@@ -59,12 +60,14 @@ function WorkGPT() {
     const [currentActions, setCurrentActions] = useState([]);
     const [suggestedAction, setSuggestedAction] = useState(null);
     const [soqlQuery, setSoqlQuery] = useState(`
-    SELECT city__c, sum(price__c) Revenue FROM Order__c
-    WHERE order_date__c > 2021-01-01 AND order_date__c <= 2021-01-31
-    GROUP BY city__c 
-    ORDER BY sum(price__c)
-    LIMIT 10
-  `);
+        SELECT city__c, sum(price__c) Revenue FROM Order__c
+        WHERE order_date__c > 2021-01-01 AND order_date__c <= 2021-01-31
+        GROUP BY city__c 
+        ORDER BY sum(price__c)
+        LIMIT 10
+    `);
+
+    const [chartData, setChartData] = useState(null);
 
 
 
@@ -508,8 +511,59 @@ function WorkGPT() {
     };
 
 
-    const handleQueryClick = () => {
-        genReport(soqlQuery);
+    const handleQueryClick = async () => {
+        const sourceData = await genReport(soqlQuery);
+
+        
+        if (sourceData && sourceData.records && sourceData.records.length) {
+            const { records } = sourceData;
+            const firstRecord = records[0];
+            let primary = null;
+            let secondary = null;
+
+            if (firstRecord.attributes.type !== 'AggregateResult') {
+                console.log('This is not aggregation data, skip to process');
+                return;
+            }
+
+            console.log('sky debug 6001 firstRecord are ', firstRecord);
+            
+            const availableKeys = Object.keys(firstRecord).filter((recordKey) => {
+                return recordKey !== 'attributes'
+            });
+
+            console.log('sky debug 6002 availableKeys are ', availableKeys);
+            if (availableKeys.length < 2) {
+                console.log('There is not enough dimension in the data');
+                return;
+            }
+            console.log('sky debug 6003 first type is ', typeof firstRecord[availableKeys[0]]);
+            console.log('sky debug 6004 second type is ', typeof firstRecord[availableKeys[1]]);
+
+            if (typeof firstRecord[availableKeys[0]] === 'string') {
+                primary = availableKeys[0];
+                secondary = availableKeys[1];
+            } else {
+                primary = availableKeys[1];
+                secondary = availableKeys[0];
+            }
+
+            const data = sourceData.records.map((record) => {
+                return {
+                    'primary': record[primary],
+                    'secondary': record[secondary]
+                }
+            })
+
+            setChartData([
+                {
+                    label: secondary,
+                    data
+                }
+            ]);
+        }
+
+        
     };
 
     const genReport = async (query) => {
@@ -649,6 +703,9 @@ function WorkGPT() {
                             onChange={handleQueryChange}
                         />
                         <Button onClick={handleQueryClick}>Gen Report</Button>
+                    </Grid>
+                    <Grid item xs={12} sm={12} sx={{ height: 200, width: 200 }}>
+                        <BarChart data={chartData} />
                     </Grid>
                 </Grid>
                 <Prompt
