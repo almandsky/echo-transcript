@@ -863,14 +863,6 @@ function WorkGPT() {
                         </Box>
                     </Grid>
                     <Grid item xs={12} sm={4}></Grid>
-                    <Grid item xs={12} sm={6}>
-                        <Typography variant="caption">You said:</Typography>
-                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking work' : 'work'}></pre></Card>
-                    </Grid>
-                    <Grid item xs={12} sm={6} className="work">
-                        <Typography variant="caption">chatGPT said:</Typography>
-                        <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking work' : 'work'}></pre></Card>
-                    </Grid>
                     <Grid item xs={12} sm={12}>
                         {
                             selectedTemplate === 'Analytics Workflow' && <BarChart data={chartData} />
@@ -890,6 +882,14 @@ function WorkGPT() {
                                 </Stepper>
                             )
                         }
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="caption">You said:</Typography>
+                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking work' : 'work'}></pre></Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} className="work">
+                        <Typography variant="caption">chatGPT said:</Typography>
+                        <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking work' : 'work'}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
                         <TextField
