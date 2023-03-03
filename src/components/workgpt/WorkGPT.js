@@ -50,8 +50,6 @@ function WorkGPT() {
         autoGainControl,
     } = state;
 
-    const chatHistoryMap = {};
-
     const [playing, setPlaying] = useState(false);
     const [localStream, setStream] = useState(null);
     const [speechRecognition, setRecognition] = useState(null);
@@ -73,6 +71,7 @@ function WorkGPT() {
 
 
     const [chatHistory, setChatHistory] = useState([]);
+    const [chatHistoryMap, setChatHistoryMap] = useState({});
 
     const textFieldRef = useRef(null);
 
@@ -132,15 +131,13 @@ function WorkGPT() {
         // speak the response
 
         // detect the intent
-        const newChatHistory = [
-            ...chatHistory
-        ];
+        const newChatHistory = chatHistory;
 
         const overallWorkContext = workTemplates['Overall Workflow'].workContext;
         const intentText = await intentDetection({
             model,
             currentWorkContext: overallWorkContext,
-            newPrompt: newPromptArray?.join('\n') + HUMAN_PREFIX + textToRead
+            newPrompt: newChatHistory?.join('\n') + HUMAN_PREFIX + textToRead
         })
 
         let newTemplate = selectedTemplate;
@@ -168,12 +165,14 @@ function WorkGPT() {
 
         console.log('sky debug 2003 newTemplate is ', newTemplate);
 
+        const newChatHistoryMap = chatHistoryMap;
+
         // const newPromptArray = chatHistory;
-        if (!chatHistoryMap[newTemplate]) {
+        if (!newChatHistoryMap[newTemplate]) {
             // Init the chat history for the template
-            chatHistoryMap[newTemplate] = [];
+            newChatHistoryMap[newTemplate] = [];
         }
-        const newPromptArray = chatHistoryMap[newTemplate];
+        const newPromptArray = newChatHistoryMap[newTemplate];
 
         newPromptArray.push(HUMAN_PREFIX + textToRead);
         newChatHistory.push(HUMAN_PREFIX + textToRead);
@@ -352,6 +351,8 @@ function WorkGPT() {
         // synth.speak(utterance);
 
         setAnswering(false);
+        newChatHistoryMap[newTemplate] = newPromptArray;
+        setChatHistoryMap(newChatHistoryMap);
         transcriptDiv.innerHTML = '';
         setSelectedTemplate(newTemplate);
     };
