@@ -30,8 +30,8 @@ The list of available workflows are listed below.
     'Analytics Workflow': {
         workContext: `
 Human: Listen carefully to my instruction.  Do not invent info.  Modify the value of the following variables based on what I say:
-metric = 'NA', its valid values can be ['NA', 'revenue', 'unit'].  Default is 'NA'.
-group_by = 'NA', its valid values can be ['customer__c', 'city__c', 'CALENDAR_MONTH()', 'CALENDAR_QUARTER()', 'CALENDAR_YEAR()', 'product__c']
+metric = 'revenue', its valid values can be ['NA', 'revenue', 'unit'].  Default is 'revenue'.
+group_by = 'city__c', its valid values can be ['customer__c', 'city__c', 'CALENDAR_MONTH()', 'CALENDAR_QUARTER()', 'CALENDAR_YEAR()', 'product__c'], Default is 'city__c'.
 customer = 'NA', its valid value can be any of the company name, Default is 'NA'.
 location = 'NA', its valid value can be any city name, Default is 'NA'.
 product_cat = 'NA', its valid values can be ['NA', 'shoes', 'handbags', 'cars'], Default is 'NA'.

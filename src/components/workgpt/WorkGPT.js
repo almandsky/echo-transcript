@@ -82,6 +82,8 @@ function WorkGPT() {
         textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
     }, [textFieldRef.current?.value]);
 
+    let template = '';
+
 
     const truncateText = (inputText) => {
         if (!inputText) {
@@ -132,14 +134,18 @@ function WorkGPT() {
         // speak the response
 
         // detect the intent
+        const newChatHistory = [
+            ...chatHistory
+        ];
+
         const overallWorkContext = workTemplates['Overall Workflow'].workContext;
         const intentText = await intentDetection({
             model,
             currentWorkContext: overallWorkContext,
-            newPrompt: textToRead
+            newPrompt: newPromptArray?.join('\n') + HUMAN_PREFIX + textToRead
         })
 
-        let newTemplate = selectedTemplate;
+        let newTemplate = template || 'Overall Workflow';
         console.log('sky debug 2000 newTemplate is ', newTemplate);
 
         console.log('sky debug 2001 intentText is ', intentText);
@@ -147,20 +153,19 @@ function WorkGPT() {
         // change the context.
         // workflow=Analytics Workflow
 
-        const newChatHistory = [
-            ...chatHistory
-        ];
+        
 
         if (intentText.indexOf('workflow=') >= 0) {
-            const newWorkflow = intentText.slice(intentText.indexOf('=') + 1).trim();
+            const newWorkflow = intentText.slice(intentText.indexOf('=') + 1).trim().replaceAll(`\``, '');
             console.log('sky debug 2002 newWorkflow is  ', newWorkflow);
 
-            if (newWorkflow && newWorkflow !== selectedTemplate && workTemplates[newTemplate]) {
+            if (newWorkflow && newWorkflow !== template && workTemplates[newTemplate]) {
                 newTemplate = newWorkflow;
+                template = newWorkflow;
                 const switchContextMessage = `\n\n Switch context to ${newWorkflow}\n\n`;
                 newChatHistory.push(switchContextMessage);
-                speakMessage(switchContextMessage)
-                // setSelectedTemplate(newWorkflow);
+                // speakMessage(switchContextMessage)
+                
             }
         }
 
