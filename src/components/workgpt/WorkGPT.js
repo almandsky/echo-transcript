@@ -151,7 +151,7 @@ function WorkGPT() {
         // change the context.
         // workflow=Analytics Workflow
 
-        
+
 
         if (intentText.indexOf('workflow=') >= 0) {
             const newWorkflow = intentText.slice(intentText.indexOf('=') + 1).trim().replaceAll(`\``, '');
@@ -296,9 +296,9 @@ function WorkGPT() {
                     } catch (err) {
                         textToDisplay = 'Failed to generate report';
                     }
-                    
 
-                    
+
+
                 } else {
                     textToDisplay = 'Cannot generate report, Please provide better instruction.';
                 }
@@ -394,7 +394,7 @@ function WorkGPT() {
             if (pause) {
                 speechRecognition.stop();
             }
-            
+
         };
 
         utterance.onend = () => {
@@ -785,6 +785,26 @@ function WorkGPT() {
         <Container component="main" sx={{ mb: 4 }}>
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
                 <Grid container spacing={3}>
+                    <Grid item xs={12} sm={12}>
+                        {
+                            selectedTemplate === 'Analytics Workflow' && <BarChart data={chartData} />
+                        }
+                        {
+                            selectedTemplate === 'Workout Workflow' && (
+                                <Stepper activeStep={0} alternativeLabel>
+                                    <Step>
+                                        <StepLabel>Running</StepLabel>
+                                    </Step>
+                                    <Step>
+                                        <StepLabel>Swimming</StepLabel>
+                                    </Step>
+                                    <Step>
+                                        <StepLabel>Push-Ups</StepLabel>
+                                    </Step>
+                                </Stepper>
+                            )
+                        }
+                    </Grid>
                     <Grid item xs={12} sm={4} sx={{ display: 'grid', gap: 2 }} id="controls">
                         <Box sx={{
                             display: 'grid',
@@ -865,26 +885,6 @@ function WorkGPT() {
                     <Grid item xs={12} sm={4}>
                         <Typography variant="caption">chatGPT said:</Typography>
                         <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                        {
-                            selectedTemplate === 'Analytics Workflow' && <BarChart data={chartData} />
-                        }
-                        {
-                            selectedTemplate === 'Workout Workflow' && (
-                                <Stepper activeStep={0} alternativeLabel>
-                                    <Step>
-                                        <StepLabel>Running</StepLabel>
-                                    </Step>
-                                    <Step>
-                                        <StepLabel>Swimming</StepLabel>
-                                    </Step>
-                                    <Step>
-                                        <StepLabel>Push-Ups</StepLabel>
-                                    </Step>
-                                </Stepper>
-                            )
-                        }
                     </Grid>
                     <Grid item xs={12} sm={12}>
                         <TextField
