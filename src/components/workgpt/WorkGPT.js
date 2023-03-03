@@ -17,6 +17,10 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
@@ -76,7 +80,7 @@ function WorkGPT() {
         textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
     }, [textFieldRef.current?.value]);
 
-    let template = '';
+    // let template = '';
 
 
     const truncateText = (inputText) => {
@@ -139,7 +143,7 @@ function WorkGPT() {
             newPrompt: newPromptArray?.join('\n') + HUMAN_PREFIX + textToRead
         })
 
-        let newTemplate = template || 'Overall Workflow';
+        let newTemplate = selectedTemplate;
         console.log('sky debug 2000 newTemplate is ', newTemplate);
 
         console.log('sky debug 2001 intentText is ', intentText);
@@ -153,13 +157,12 @@ function WorkGPT() {
             const newWorkflow = intentText.slice(intentText.indexOf('=') + 1).trim().replaceAll(`\``, '');
             console.log('sky debug 2002 newWorkflow is  ', newWorkflow);
 
-            if (newWorkflow && newWorkflow !== template && workTemplates[newTemplate]) {
+            if (newWorkflow && newWorkflow !== selectedTemplate && workTemplates[newWorkflow]) {
+                console.log('sky debug 2002222 setting newWorkflow is  ', newWorkflow);
                 newTemplate = newWorkflow;
-                template = newWorkflow;
                 const switchContextMessage = `\n\n Switch context to ${newWorkflow}\n\n`;
                 newChatHistory.push(switchContextMessage);
                 // speakMessage(switchContextMessage)
-                
             }
         }
 
@@ -285,11 +288,17 @@ function WorkGPT() {
                                 LIMIT 10`;
 
                     console.log('sky debug 3003 queryText are ', queryText);
-                    await genChart(queryText);
+                    try {
+                        await genChart(queryText);
 
-                    setSoqlQuery(queryText);
+                        setSoqlQuery(queryText);
+                        textToDisplay = 'Generating report';
+                    } catch (err) {
+                        textToDisplay = 'Failed to generate report';
+                    }
+                    
 
-                    textToDisplay = 'Generating report';
+                    
                 } else {
                     textToDisplay = 'Cannot generate report, Please provide better instruction.';
                 }
@@ -316,7 +325,7 @@ function WorkGPT() {
             setChatHistory(newPromptArray);
         });
 
-        speakMessage(textToDisplay);
+        speakMessage(textToDisplay, true);
 
         // const supportedVoices = window.speechSynthesis.getVoices();
         // const utterance = new SpeechSynthesisUtterance(textToDisplay);
@@ -344,11 +353,12 @@ function WorkGPT() {
 
         setAnswering(false);
         transcriptDiv.innerHTML = '';
+        setSelectedTemplate(newTemplate);
     };
 
     const handleOnclickTest = () => {
         const answerDiv = document.querySelector('#answer-div');
-        speakMessage(answerDiv.innerHTML);
+        speakMessage(answerDiv.innerHTML, true);
     };
 
     function typeMessage(element, message, callback) {
@@ -369,7 +379,7 @@ function WorkGPT() {
         }
     }
 
-    const speakMessage = (textToDisplay) => {
+    const speakMessage = (textToDisplay, pause = false) => {
         const supportedVoices = window.speechSynthesis.getVoices();
         const utterance = new SpeechSynthesisUtterance(textToDisplay);
         if (language !== 'en-US') {
@@ -380,13 +390,18 @@ function WorkGPT() {
         utterance.rate = 0.9;
 
         utterance.onstart = () => {
-            console.log('Speech started');
-            speechRecognition.stop();
+            console.log('Speech started, pause is ', pause);
+            if (pause) {
+                speechRecognition.stop();
+            }
+            
         };
 
         utterance.onend = () => {
-            console.log('Speech ended');
-            speechRecognition.start();
+            console.log('Speech ended, pause is ', pause);
+            if (pause) {
+                speechRecognition.start();
+            }
         };
         synth.speak(utterance);
     }
@@ -829,7 +844,6 @@ function WorkGPT() {
                                         id="template-select"
                                         label="Work Template"
                                         onChange={handleTemplateChange}
-                                        disabled={playing}
                                         value={selectedTemplate}
                                     >
                                         {
@@ -853,7 +867,24 @@ function WorkGPT() {
                         <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
-                        <BarChart data={chartData} />
+                        {
+                            selectedTemplate === 'Analytics Workflow' && <BarChart data={chartData} />
+                        }
+                        {
+                            selectedTemplate === 'Workout Workflow' && (
+                                <Stepper activeStep={0} alternativeLabel>
+                                    <Step>
+                                        <StepLabel>Running</StepLabel>
+                                    </Step>
+                                    <Step>
+                                        <StepLabel>Swimming</StepLabel>
+                                    </Step>
+                                    <Step>
+                                        <StepLabel>Push-Ups</StepLabel>
+                                    </Step>
+                                </Stepper>
+                            )
+                        }
                     </Grid>
                     <Grid item xs={12} sm={12}>
                         <TextField

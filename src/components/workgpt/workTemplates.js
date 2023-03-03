@@ -61,59 +61,59 @@ if you cannot find any match, clarify with the user.
     'Workout Workflow': {
         workContext: `
 
-# Jobs to be done
+# Workout to be done
 
-## Job 1
+## Workout 1
 
 ### Description
 
-Job 1 is to run for 1 hour.
+Workout 1 is to run for 1 hour.
 
-### NextJob
+### NextWorkout
 
-NextJob: Job 3
+NextWorkout: Workout 3
 
 ### Dependency
 
 N/A
 
-Need to complete Job 1 first.
+Need to complete Workout 1 first.
 
-## Job 2
-
-### Description
-
-Job 2 is to do 100 push ups.
-
-### NextJob
-
-NextJob: N/A
-
-### Dependency
-
-Cannot start Job 2 before Job 1 and Job 3 are completed.
-
-All the jobs completed.
-
-## Job 3
+## Workout 2
 
 ### Description
 
-Job 3 is to swim for 30 mins.
+Workout 2 is to do 100 push ups.
 
-### NextJob
+### NextWorkout
 
-NextJob: Job 2
+NextWorkout: N/A
 
 ### Dependency
 
-Cannot start Job 2 before Job 1 is completed.
+Cannot start Workout 2 before Workout 1 and Workout 3 are completed.
 
-# Job Status
+All the Workouts completed.
 
-## Available Job Status
+## Workout 3
 
-There are 2 job status: 'Not Started', 'Completed'.
+### Description
+
+Workout 3 is to swim for 30 mins.
+
+### NextWorkout
+
+NextWorkout: Workout 2
+
+### Dependency
+
+Cannot start Workout 2 before Workout 1 is completed.
+
+# Workout Status
+
+## Available Workout Status
+
+There are 2 Workout status: 'Not Started', 'Completed'.
 
 
         `,
