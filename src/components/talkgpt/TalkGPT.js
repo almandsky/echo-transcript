@@ -27,6 +27,8 @@ const AI_PREFIX = 'AI:';
 
 const AI_ENDPOINT = '/completions';
 
+const MAX_HISTORY = 1000;
+
 function TalkGPT() {
 
     const [state, setState] = useState({
@@ -96,8 +98,8 @@ function TalkGPT() {
 
         newPromptArray.push(HUMAN_PREFIX + textToRead);
 
-        const newPrompt = newPromptArray.length > 5
-            ? newPromptArray.slice(-5).join('\n')
+        const newPrompt = newPromptArray.length > MAX_HISTORY
+            ? newPromptArray.slice(-MAX_HISTORY).join('\n')
             : newPromptArray.join('\n');
 
         window?.gtag('event', 'call_openai_start', {

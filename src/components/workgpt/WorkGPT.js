@@ -29,7 +29,7 @@ const AI_PREFIX = 'AI:';
 
 const AI_ENDPOINT = '/completions';
 
-const MAX_HISTORY = 100;
+const MAX_HISTORY = 1000;
 
 function WorkGPT() {
 
