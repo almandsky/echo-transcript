@@ -781,31 +781,15 @@ function WorkGPT() {
         processAnswer();
     }
 
+    // block | none
+    const debug = false;
+    const devDisplay = debug ? 'block' : 'none';
 
     return (
         <Container component="main" sx={{ mb: 4 }}>
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} sm={12}>
-                        {
-                            selectedTemplate === 'Analytics Workflow' && <BarChart data={chartData} />
-                        }
-                        {
-                            selectedTemplate === 'Workout Workflow' && (
-                                <Stepper activeStep={0} alternativeLabel>
-                                    <Step>
-                                        <StepLabel>Running</StepLabel>
-                                    </Step>
-                                    <Step>
-                                        <StepLabel>Swimming</StepLabel>
-                                    </Step>
-                                    <Step>
-                                        <StepLabel>Push-Ups</StepLabel>
-                                    </Step>
-                                </Stepper>
-                            )
-                        }
-                    </Grid>
+                    <Grid item xs={12} sm={4}></Grid>
                     <Grid item xs={12} sm={4} sx={{ display: 'grid', gap: 2 }} id="controls">
                         <Box sx={{
                             display: 'grid',
@@ -816,8 +800,7 @@ function WorkGPT() {
                             <Button variant="contained" disabled={!playing} onClick={handleStopClick}>Stop</Button>
                             <Button variant="contained" disabled={playing} onClick={handleResetClick}>Reset</Button>
                         </Box>
-
-                        <Box align="center">
+                        <Box align="center" sx={{ display: devDisplay }}>
                             <FormControl component="fieldset" variant="standard" align='left'>
                                 <FormControl variant="standard">
                                     <LanguageSelect
@@ -879,15 +862,36 @@ function WorkGPT() {
                             </FormControl>
                         </Box>
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={4}></Grid>
+                    <Grid item xs={12} sm={6}>
                         <Typography variant="caption">You said:</Typography>
-                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking work' : 'work'}></pre></Card>
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={6} className="work">
                         <Typography variant="caption">chatGPT said:</Typography>
-                        <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
+                        <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking work' : 'work'}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
+                        {
+                            selectedTemplate === 'Analytics Workflow' && <BarChart data={chartData} />
+                        }
+                        {
+                            selectedTemplate === 'Workout Workflow' && (
+                                <Stepper activeStep={0} alternativeLabel>
+                                    <Step>
+                                        <StepLabel>Running</StepLabel>
+                                    </Step>
+                                    <Step>
+                                        <StepLabel>Swimming</StepLabel>
+                                    </Step>
+                                    <Step>
+                                        <StepLabel>Push-Ups</StepLabel>
+                                    </Step>
+                                </Stepper>
+                            )
+                        }
+                    </Grid>
+                    <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
                         <TextField
                             id="soql-input"
                             label="SOQL Query"
@@ -899,7 +903,7 @@ function WorkGPT() {
                             onChange={handleQueryChange}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12}>
+                    <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
                         <TextField
                             id="context-input"
                             label="Work Context"
@@ -911,7 +915,7 @@ function WorkGPT() {
                             onChange={handleWorkContextChange}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={12}>
+                    <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
                         <TextField
                             id="text-input"
                             label="Chat History"
@@ -924,7 +928,7 @@ function WorkGPT() {
                         />
                         <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
                     </Grid>
-                    <Grid item xs={12} sm={12}>
+                    <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
                         <Button onClick={handleQueryClick}>Gen Report</Button>
                         <Button onClick={handleRestRequestClick}>Test request</Button>
                     </Grid>
