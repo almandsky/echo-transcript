@@ -1,152 +1,64 @@
 const workTemplates = {
-    'Parameter Generation': {
+    'Overall Workflow': {
         workContext: `
-Manage the value setting of the following variables while chatting with me:
-metric = 'NA' initially, it can be set to value of ['revenue', 'unit']
-group_by = 'NA' initially, it can be set to value of ['customer', 'city', 'country', 'continent', 'day', 'month', 'quarter', 'year']
-customer = 'NA' initially, it can be set to value of any company name
-location = 'NA' initially, it can be set to any continent, country, city
-start_date = '1/1/2022' initially, it can be set to any date
+# Instruction
 
-Q: How are you?
-A: show(metric='NA', group_by='NA', customer='NA', location='NA', start_date-'1/1/2022')
+This is the top level workflow, which we can see all the workflows that can perform below.
 
-Q: Show my revenue since March 2022
-A: show(metric='revenue', group_by='NA', customer='NA', location='NA', start_date-'3/1/2022')
-
-Q: Breakdown by city
-A: show(metric='revenue', group_by='city', customer='NA', location='NA', start_date-'3/1/2022')
-
-
-Q: Group by month
-A: show(metric='revenue', group_by='month', customer='NA', location='NA', start_date-'3/1/2022')
-
-
-Q: Drill down to Walmart
-A: show(metric='revenue', group_by='month', customer='Walmart', location='NA', start_date-'3/1/2022')
-
-Q: Zoom in to China
-A: show(metric='revenue', group_by='month', customer='Walmart', location='China', start_date-'3/1/2022')
-
-
-Q: Let me think more about it
-A: show(metric='revenue', group_by='month', customer='Walmart', location='China', start_date-'3/1/2022')
-        `,
-        actions: {
-            'Execute getChart': {
-                description: 'Execute the getChart()',
-                command: (parameters) => {
-                    console.log(`Executing getChart command for parameters: ${parameters}`);
-                },
-                processResult: (result, error) => {
-                    if (error) {
-                        console.error(`Failed to execute getChart command, error is ${error}`);
-                    }
-
-                    console.log(`Processed getChart result: ${result}`);
-                }
-            }
-        }
-    },
-
-
-
-
-    'Generic Workflow': {
-        workContext: `
-# Overall WorkFlow
-
-This is the top level workflow, which you can see all the workflows that Human can perform below.
-
-If you cannot find any workflow match, come back to this <Overall Workflow>
+If you cannot find any workflow match, come back to this 'Overall Workflow', and ask what to do next.
 
 ## Available Workflows
 
-The list of available workflows are listed below:
+The list of available workflows are listed below.
 
-### Analytics Copilot
+### Overall WorkFlow
 
+'Overall Workflow' is the entry point.  If you cannot find any matching workflow, come back to this 'Overall Workflow'.
 
-### API Parameters Generation
+### Analytics Workflow
 
+'Analytics Workflow' is the workflow to define the the report parameters.  If Human want to know more about the Revenue and business related info, go to this 'Analytics Workflow'.
 
-### API execution
+### Workout Workflow
 
-
-### 
+'Workout Workflow' is to help to keep the 'Human' healthy.  It will guide the 'Human' on what he shall do to improve his health status by doing the workouts defined in the 'Workout Workflow'.
 
 
         `,
-        actions: {
-            'Execute getChart': {
-                description: 'Execute the getChart()',
-                command: (parameters) => {
-                    console.log(`Executing getChart command for parameters: ${parameters}`);
-                },
-                processResult: (result, error) => {
-                    if (error) {
-                        console.error(`Failed to execute getChart command, error is ${error}`);
-                    }
-
-                    console.log(`Processed getChart result: ${result}`);
-                }
-            }
-        }
+        actions: []
     },
-    'Analytics Copilot': {
+    'Analytics Workflow': {
         workContext: `
-<Tables>:
+Human: Listen carefully to my instruction.  Do not invent info.  Modify the value of the following variables based on what I say:
+metric = 'NA', its valid values can be ['NA', 'revenue', 'unit'].  Default is 'NA'.
+group_by = 'NA', its valid values can be ['customer__c', 'city__c', 'CALENDAR_MONTH()', 'CALENDAR_QUARTER()', 'CALENDAR_YEAR()', 'product__c']
+customer = 'NA', its valid value can be any of the company name, Default is 'NA'.
+location = 'NA', its valid value can be any city name, Default is 'NA'.
+product_cat = 'NA', its valid values can be ['NA', 'shoes', 'handbags', 'cars'], Default is 'NA'.
+start_date = 'NA', its valid value can be any date, the start_date format is 'yyyy-mm-dd', Default is 'NA'.
 
-* TransactionTable: [tran_ID, date, customer, product, location, quantity, price]
-* LocationTable: [continent, country, city]
-* ProductTable: [product, category]
+If you don't find anything I said matching the variables, keep the existing value unchanged
+If the value that I mention doesn't fall into the range of valid value, also keep the existing value unchanged
+If you find anything I mentioned matching the variables, change the value based on what I said
+If I ask you to forget, or reset the variable, set its value to 'NA'
 
-Query format:
+After each question, Reply in this format:
 
-SELECT <metric> FROM <Table>
-WHERE <filters> 
-GROUP BY <dimensions> 
-ORDER BY <metric> 
-LIMIT <k>
+\` show(metric=<metric>, group_by=<group_by>, customer=<customer>, location=<location>, product_cat=<product_cat>, start_date=<start_date>) \`
 
+if you cannot find any match, clarify with the user.
 
-Parameters:
+`,
+        actions: [(answerText, callback) => {
+            console.log('sky debug 4001 answerText is ', answerText);
 
-* <Table>, mandatory
-    * One of the table provided above.
-* <metric> = [sum(price), count(*)], mandatory
-* <filters> optional
-    * from <start_date> to <end_date> or last <k> days/months/year
-    * product X or category Y
-    * customer A
-    * continent B or country C or city D
-* <dimensions>, mandatory
-    * by yearly/monthly/weekly
-    * by continent/country/city
-    * by customers
-    * by categories/product
-
-* <k>, optional
-
-
-        `,
-        actions: {
-            'Execute getChart': {
-                description: 'Execute the getChart()',
-                command: (parameters) => {
-                    console.log(`Executing getChart command for parameters: ${parameters}`);
-                },
-                processResult: (result, error) => {
-                    if (error) {
-                        console.error(`Failed to execute getChart command, error is ${error}`);
-                    }
-
-                    console.log(`Processed getChart result: ${result}`);
-                }
+            const formattedText = answerText;
+            if (callback) {
+                callback(formattedText)
             }
-        }
+        }]
     },
-    'Others': {
+    'Workout Workflow': {
         workContext: `
 
 # Jobs to be done
@@ -161,6 +73,10 @@ Job 1 is to run for 1 hour.
 
 NextJob: Job 3
 
+### Dependency
+
+N/A
+
 Need to complete Job 1 first.
 
 ## Job 2
@@ -172,6 +88,10 @@ Job 2 is to do 100 push ups.
 ### NextJob
 
 NextJob: N/A
+
+### Dependency
+
+Cannot start Job 2 before Job 1 and Job 3 are completed.
 
 All the jobs completed.
 
@@ -185,50 +105,26 @@ Job 3 is to swim for 30 mins.
 
 NextJob: Job 2
 
-Need to complete Job 1 and job 3 first.
+### Dependency
+
+Cannot start Job 2 before Job 1 is completed.
+
+# Job Status
+
+## Available Job Status
+
+There are 2 job status: 'Not Started', 'Completed'.
+
 
         `,
-        actions: {
-            'Opportunity Report': {
-                description: 'Provide the reports to query the information related to Opportunities.',
-                command: (parameters) => {
-                    console.log(`Executing Opportunity Report command for parameters: ${parameters}`);
-                },
-                processResult: (result, error) => {
-                    if (error) {
-                        console.error(`Failed to execute Opportunity Report command, error is ${error}`);
-                    }
+        actions: [(answerText, callback) => {
+            console.log('sky debug 4001 answerText is ', answerText);
 
-                    console.log(`Processed Opportunity Report result: ${result}`);
-                }
-            },
-            'Sales Report': {
-                description: 'Provide the reports to query the information related to Sales.',
-                command: (parameters) => {
-                    console.log(`Executing Sales Report command for parameters: ${parameters}`);
-                },
-                processResult: (result, error) => {
-                    if (error) {
-                        console.error(`Failed to execute Sales Report command, error is ${error}`);
-                    }
-
-                    console.log(`Processed Sales Report result: ${result}`);
-                }
-            },
-            'Summary Report': {
-                description: 'Provide the summary report for the whole company operations. Shall be the default options if other actions does not match.',
-                command: (parameters) => {
-                    console.log(`Executing Summary Report command for parameters: ${parameters}`);
-                },
-                processResult: (result, error) => {
-                    if (error) {
-                        console.error(`Failed to execute Summary Report command, error is ${error}`);
-                    }
-
-                    console.log(`Processed Summary Report result: ${result}`);
-                }
+            const formattedText = answerText;
+            if (callback) {
+                callback(formattedText)
             }
-        }
+        }]
     },
 }
 

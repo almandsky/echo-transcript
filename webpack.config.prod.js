@@ -83,6 +83,13 @@ module.exports = {
           },
         },
         {
+          urlPattern: /workgpt/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'html-cache',
+          },
+        },
+        {
           urlPattern: /talkgpt/,
           handler: 'StaleWhileRevalidate',
           options: {

@@ -22,6 +22,7 @@ import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
 import workTemplates from './workTemplates';
+import { intentDetection } from './systemWorkers';
 import BarChart from '../charts/BarChart';
 
 const HUMAN_PREFIX = 'Human:';
@@ -45,7 +46,7 @@ function WorkGPT() {
         autoGainControl,
     } = state;
 
-
+    const chatHistoryMap = {};
 
     const [playing, setPlaying] = useState(false);
     const [localStream, setStream] = useState(null);
@@ -57,7 +58,7 @@ function WorkGPT() {
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [model, setModel] = useState('text-davinci-003');
 
-    const [selectedTemplate, setSelectedTemplate] = useState('Analytics Copilot');
+    const [selectedTemplate, setSelectedTemplate] = useState('Overall Workflow');
     const [currentWorkContext, setCurrentWorkContext] = useState('');
     const [currentActions, setCurrentActions] = useState([]);
     const [suggestedAction, setSuggestedAction] = useState(null);
@@ -103,7 +104,7 @@ function WorkGPT() {
     }
 
     const processAnswer = async () => {
-        const supportedVoices = window.speechSynthesis.getVoices();
+        // const supportedVoices = window.speechSynthesis.getVoices();
         const transcriptDiv = document.querySelector('#transcript-div');
         const answerDiv = document.querySelector('#answer-div');
         const textToRead = transcriptDiv.innerHTML;
@@ -112,9 +113,68 @@ function WorkGPT() {
             return;
         }
 
-        const newPromptArray = chatHistory;
+
+
+        setAnswering(true);
+
+        // detect intent
+
+        // load the context
+
+        // load the history of that context
+
+        // send the request with the intended context
+
+        // call the actions of the context
+
+        // set the history to that context
+
+        // speak the response
+
+        // detect the intent
+        const overallWorkContext = workTemplates['Overall Workflow'].workContext;
+        const intentText = await intentDetection({
+            model,
+            currentWorkContext: overallWorkContext,
+            newPrompt: textToRead
+        })
+
+        let newTemplate = selectedTemplate;
+        console.log('sky debug 2000 newTemplate is ', newTemplate);
+
+        console.log('sky debug 2001 intentText is ', intentText);
+        // extract the intent
+        // change the context.
+        // workflow=Analytics Workflow
+
+        const newChatHistory = [
+            ...chatHistory
+        ];
+
+        if (intentText.indexOf('workflow=') >= 0) {
+            const newWorkflow = intentText.slice(intentText.indexOf('=') + 1).trim();
+            console.log('sky debug 2002 newWorkflow is  ', newWorkflow);
+
+            if (newWorkflow && newWorkflow !== selectedTemplate && workTemplates[newTemplate]) {
+                newTemplate = newWorkflow;
+                const switchContextMessage = `\n\n Switch context to ${newWorkflow}\n\n`;
+                newChatHistory.push(switchContextMessage);
+                speakMessage(switchContextMessage)
+                // setSelectedTemplate(newWorkflow);
+            }
+        }
+
+        console.log('sky debug 2003 newTemplate is ', newTemplate);
+
+        // const newPromptArray = chatHistory;
+        if (!chatHistoryMap[newTemplate]) {
+            // Init the chat history for the template
+            chatHistoryMap[newTemplate] = [];
+        }
+        const newPromptArray = chatHistoryMap[newTemplate];
 
         newPromptArray.push(HUMAN_PREFIX + textToRead);
+        newChatHistory.push(HUMAN_PREFIX + textToRead);
 
         const newPrompt = newPromptArray.length > MAX_HISTORY
             ? newPromptArray.slice(-MAX_HISTORY).join('\n')
@@ -126,11 +186,18 @@ function WorkGPT() {
             'value': newPrompt.length
         });
 
-        setAnswering(true);
+        const newWorkContext = workTemplates[newTemplate].workContext;
+
+        // if it is workout context, add the current state to the prompt
+
+        const temperature = newTemplate === 'Overall Workflow'
+            ? 0.5
+            : 0.1
+
         const response = await axios.post(AI_ENDPOINT, {
             "model": model,
-            "prompt": currentWorkContext + '\n\n' + newPrompt,
-            "temperature": 0.1,
+            "prompt": newWorkContext + '\n\n' + newPrompt,
+            "temperature": temperature,
             "max_tokens": 500,
             "top_p": 1,
             "frequency_penalty": 0.2,
@@ -141,6 +208,17 @@ function WorkGPT() {
         const answerText = response.data;
 
         newPromptArray.push(answerText);
+        newChatHistory.push(HUMAN_PREFIX + textToRead);
+
+        // const intentText = await intentDetection({
+        //     model,
+        //     currentWorkContext,
+        //     newPrompt
+        // })
+
+        // console.log('sky debug 1001 intentText is ', intentText);
+
+
 
         window?.gtag('event', 'call_openai_completed', {
             'event_category': language,
@@ -148,50 +226,130 @@ function WorkGPT() {
             'value': answerText.length
         });
 
-        const textToDisplay = truncateText(answerText);
+        // now handle the answerText based on the current work flow
 
-        typeMessage(answerDiv, textToDisplay, () => {
+        let textToDisplay = '';
+
+        if (newTemplate === 'Analytics Workflow') {
+            // parse the parameter
+
+            // ` show(metric, group_by, customer, location, start_date)`
+            const regex = /show\((.*)\)/;
+            const match = answerText.match(regex);
+
+            const queryObject = {};
+
+            if (match) {
+                const rawParams = match[1];
+                console.log('sky debug 3001 rawParams are ', rawParams);
+                const params = rawParams.split(',');
+                console.log('sky debug 3002 params are ', params);
+                if (params[0].indexOf('=') >= 0) {
+                    params.forEach((param) => {
+                        const [key, value] = param.split('=');
+                        queryObject[key.trim()] = value.trim().replaceAll('\'', '');
+                    })
+                }
+
+                if (queryObject.metric && queryObject.metric !== 'NA' && queryObject.group_by && queryObject.group_by !== 'NA') {
+
+                    const metricParam = queryObject.metric === 'revenue'
+                        ? 'sum(price__c)'
+                        : 'count(quantity__c)';
+
+                    const groupByParam = queryObject.group_by.indexOf('CALENDAR') >= 0
+                        ? queryObject.group_by.replace('()', '(order_date__c)')
+                        : queryObject.group_by;
+
+                    const whereParams = [];
+
+                    if (queryObject.location && queryObject.location !== 'NA') {
+                        whereParams.push(`city__c = '${queryObject.location}'`);
+                    }
+
+                    if (queryObject.product_cat && queryObject.product_cat !== 'NA') {
+                        whereParams.push(`product__c = '${queryObject.product_cat}'`);
+                    }
+
+                    if (queryObject.start_date && queryObject.start_date !== 'NA') {
+                        whereParams.push(`order_date__c >= ${queryObject.start_date}`);
+                    }
+
+                    const whereText = whereParams.length
+                        ? `WHERE ${whereParams.join(' AND ')}`
+                        : ''
+
+                    const queryText = `SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
+                                ${whereText}
+                                GROUP BY ${groupByParam} 
+                                ORDER BY ${metricParam}
+                                LIMIT 10`;
+
+                    console.log('sky debug 3003 queryText are ', queryText);
+                    await genChart(queryText);
+
+                    setSoqlQuery(queryText);
+
+                    textToDisplay = 'Generating report';
+                } else {
+                    textToDisplay = 'Cannot generate report, Please provide better instruction.';
+                }
+
+                console.log('sky debug 3004 queryObject are ', queryObject);
+            } else {
+                textToDisplay = truncateText(answerText);
+            }
+
+            // update report
+            // if report is updated, speak 'Report updated'
+
+        } else if (newTemplate === 'Workout Workflow') {
+            // keep track of the current state of the workout progress.
+            // update the new workout status
+            textToDisplay = truncateText(answerText);
+        } else {
+            // generic Q & A
+            textToDisplay = truncateText(answerText);
+        }
+
+        typeMessage(answerDiv, textToDisplay, async () => {
             answerDiv.scrollTop = answerDiv.scrollHeight;
             setChatHistory(newPromptArray);
         });
 
-        const utterance = new SpeechSynthesisUtterance(textToDisplay);
-        if (language !== 'en-US') {
-            utterance.voice = supportedVoices.find((voice) => voice.lang === language);
-        }
+        speakMessage(textToDisplay);
 
-        utterance.lang = language;
-        utterance.rate = 0.9;
+        // const supportedVoices = window.speechSynthesis.getVoices();
+        // const utterance = new SpeechSynthesisUtterance(textToDisplay);
+        // if (language !== 'en-US') {
+        //     utterance.voice = supportedVoices.find((voice) => voice.lang === language);
+        // }
 
-        utterance.onstart = () => {
-            console.log('Speech started');
-            speechRecognition.stop();
-        };
+        // utterance.lang = language;
+        // utterance.rate = 0.9;
 
-        utterance.onend = () => {
-            console.log('Speech ended');
-            speechRecognition.start();
-        };
-        synth.speak(utterance);
+        // utterance.onstart = () => {
+        //     console.log('Speech started');
+        //     if (speechRecognition) {
+        //         speechRecognition.stop();
+        //     }
+        // };
+
+        // utterance.onend = () => {
+        //     console.log('Speech ended');
+        //     if (speechRecognition) {
+        //         speechRecognition.start();
+        //     }
+        // };
+        // synth.speak(utterance);
 
         setAnswering(false);
         transcriptDiv.innerHTML = '';
     };
 
-    const testSpeech = (message) => {
-        const supportedVoices = window.speechSynthesis.getVoices();
-        const utterance = new SpeechSynthesisUtterance(message);
-        if (language !== 'en-US') {
-            utterance.voice = supportedVoices.find((voice) => voice.lang === language);
-        }
-        utterance.lang = language;
-        utterance.rate = 0.9;
-        synth.speak(utterance);
-    };
-
     const handleOnclickTest = () => {
         const answerDiv = document.querySelector('#answer-div');
-        testSpeech(answerDiv.innerHTML);
+        speakMessage(answerDiv.innerHTML);
     };
 
     function typeMessage(element, message, callback) {
@@ -210,7 +368,28 @@ function WorkGPT() {
         } catch (err) {
             console.log(`typeMessage error detected: ${err}`);
         }
+    }
 
+    const speakMessage = (textToDisplay) => {
+        const supportedVoices = window.speechSynthesis.getVoices();
+        const utterance = new SpeechSynthesisUtterance(textToDisplay);
+        if (language !== 'en-US') {
+            utterance.voice = supportedVoices.find((voice) => voice.lang === language);
+        }
+
+        utterance.lang = language;
+        utterance.rate = 0.9;
+
+        utterance.onstart = () => {
+            console.log('Speech started');
+            speechRecognition.stop();
+        };
+
+        utterance.onend = () => {
+            console.log('Speech ended');
+            speechRecognition.start();
+        };
+        synth.speak(utterance);
     }
 
     const startProcess = async () => {
@@ -432,7 +611,7 @@ function WorkGPT() {
         // based on is playing or not, either start the audio or stop.
         if (playing) {
             await startProcess();
-            testSpeech('Let\'s start!');
+            speakMessage('Let\'s start!');
         } else {
             stopProcess();
         }
@@ -512,9 +691,8 @@ function WorkGPT() {
         setSoqlQuery(event.target.value);
     };
 
-
-    const handleQueryClick = async () => {
-        const sourceData = await genReport(soqlQuery);
+    const genChart = async (soqlQuery) => {
+        const sourceData = await makeQuery(soqlQuery);
 
         if (sourceData && sourceData.records && sourceData.records.length) {
             const { records } = sourceData;
@@ -528,7 +706,7 @@ function WorkGPT() {
             }
 
             console.log('sky debug 6001 firstRecord are ', firstRecord);
-            
+
             const availableKeys = Object.keys(firstRecord).filter((recordKey) => {
                 return recordKey !== 'attributes'
             });
@@ -563,11 +741,13 @@ function WorkGPT() {
                 }
             ]);
         }
+    }
 
-        
+    const handleQueryClick = async () => {
+        await genChart(soqlQuery);
     };
 
-    const genReport = async (query) => {
+    const makeQuery = async (query) => {
         if (!query) {
             console.error('Empty query!');
             return;
@@ -579,6 +759,12 @@ function WorkGPT() {
 
         return response?.data;
     };
+
+    const handleRestRequestClick = () => {
+        const transcriptDiv = document.querySelector('#transcript-div');
+        transcriptDiv.innerHTML = 'Let\'s start. Show me the revenue from last year group by city.';
+        processAnswer();
+    }
 
 
     return (
@@ -668,6 +854,10 @@ function WorkGPT() {
                         <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={12}>
+                        <BarChart data={chartData} />
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={12}>
                         <TextField
                             id="context-input"
                             label="Work Context"
@@ -704,8 +894,8 @@ function WorkGPT() {
                             onChange={handleQueryChange}
                         />
                         <Button onClick={handleQueryClick}>Gen Report</Button>
+                        <Button onClick={handleRestRequestClick}>Test request</Button>
                     </Grid>
-                    <BarChart data={chartData} />
                 </Grid>
                 <Prompt
                     when={playing}
