@@ -16,7 +16,8 @@ const BarChart = ({ data }) => {
         () => [
             {
                 getValue: datum => datum.secondary,
-                elementType: 'bar'
+                elementType: 'bar',
+                min: 0
             },
         ],
         []
