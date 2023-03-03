@@ -62,13 +62,7 @@ function WorkGPT() {
     const [currentWorkContext, setCurrentWorkContext] = useState('');
     const [currentActions, setCurrentActions] = useState([]);
     const [suggestedAction, setSuggestedAction] = useState(null);
-    const [soqlQuery, setSoqlQuery] = useState(`
-        SELECT city__c, sum(price__c) Revenue FROM Order__c
-        WHERE order_date__c > 2021-01-01 AND order_date__c <= 2021-01-31
-        GROUP BY city__c 
-        ORDER BY sum(price__c)
-        LIMIT 10
-    `);
+    const [soqlQuery, setSoqlQuery] = useState(``);
 
     const [chartData, setChartData] = useState(null);
 
@@ -861,7 +855,18 @@ function WorkGPT() {
                     <Grid item xs={12} sm={12}>
                         <BarChart data={chartData} />
                     </Grid>
-                    
+                    <Grid item xs={12} sm={12}>
+                        <TextField
+                            id="soql-input"
+                            label="SOQL Query"
+                            variant="outlined"
+                            multiline
+                            sx={{ width: '100%' }}
+                            rows={4}
+                            value={soqlQuery}
+                            onChange={handleQueryChange}
+                        />
+                    </Grid>
                     <Grid item xs={12} sm={12}>
                         <TextField
                             id="context-input"
@@ -888,16 +893,6 @@ function WorkGPT() {
                         <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
                     </Grid>
                     <Grid item xs={12} sm={12}>
-                        <TextField
-                            id="soql-input"
-                            label="SOQL Query"
-                            variant="outlined"
-                            multiline
-                            sx={{ width: '100%' }}
-                            rows={4}
-                            value={soqlQuery}
-                            onChange={handleQueryChange}
-                        />
                         <Button onClick={handleQueryClick}>Gen Report</Button>
                         <Button onClick={handleRestRequestClick}>Test request</Button>
                     </Grid>
