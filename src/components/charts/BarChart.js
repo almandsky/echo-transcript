@@ -3,7 +3,6 @@ import { Chart } from 'react-charts';
 import Grid from '@mui/material/Grid';
 
 const BarChart = ({ data }) => {
-    console.log('sky debug 1001 data is ', data);
 
     const primaryAxis = React.useMemo(
         () => ({

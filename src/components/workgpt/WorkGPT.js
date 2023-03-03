@@ -141,29 +141,19 @@ function WorkGPT() {
         })
 
         let newTemplate = selectedTemplate;
-        console.log('sky debug 2000 newTemplate is ', newTemplate);
-
-        console.log('sky debug 2001 intentText is ', intentText);
-        // extract the intent
-        // change the context.
-        // workflow=Analytics Workflow
 
 
 
         if (intentText.indexOf('workflow=') >= 0) {
             const newWorkflow = intentText.slice(intentText.indexOf('=') + 1).trim().replaceAll(`\``, '');
-            console.log('sky debug 2002 newWorkflow is  ', newWorkflow);
 
             if (newWorkflow && newWorkflow !== selectedTemplate && workTemplates[newWorkflow]) {
-                console.log('sky debug 2002222 setting newWorkflow is  ', newWorkflow);
                 newTemplate = newWorkflow;
                 const switchContextMessage = `\n\n Switch context to ${newWorkflow}\n\n`;
                 newChatHistory.push(switchContextMessage);
                 // speakMessage(switchContextMessage)
             }
         }
-
-        console.log('sky debug 2003 newTemplate is ', newTemplate);
 
         const newChatHistoryMap = chatHistoryMap;
 
@@ -211,15 +201,6 @@ function WorkGPT() {
         newPromptArray.push(answerText);
         newChatHistory.push(HUMAN_PREFIX + textToRead);
 
-        // const intentText = await intentDetection({
-        //     model,
-        //     currentWorkContext,
-        //     newPrompt
-        // })
-
-        // console.log('sky debug 1001 intentText is ', intentText);
-
-
 
         window?.gtag('event', 'call_openai_completed', {
             'event_category': language,
@@ -242,9 +223,9 @@ function WorkGPT() {
 
             if (match) {
                 const rawParams = match[1];
-                console.log('sky debug 3001 rawParams are ', rawParams);
+
                 const params = rawParams.split(',');
-                console.log('sky debug 3002 params are ', params);
+
                 if (params[0].indexOf('=') >= 0) {
                     params.forEach((param) => {
                         const [key, value] = param.split('=');
@@ -280,13 +261,13 @@ function WorkGPT() {
                         ? `WHERE ${whereParams.join(' AND ')}`
                         : ''
 
-                    const queryText = `SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
-                                ${whereText}
-                                GROUP BY ${groupByParam} 
-                                ORDER BY ${metricParam}
-                                LIMIT 10`;
+                    const queryText = `
+SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
+    ${whereText}
+    GROUP BY ${groupByParam} 
+    ORDER BY ${metricParam}
+    LIMIT 10`;
 
-                    console.log('sky debug 3003 queryText are ', queryText);
                     try {
                         await genChart(queryText);
 
@@ -302,7 +283,6 @@ function WorkGPT() {
                     textToDisplay = 'Cannot generate report, Please provide better instruction.';
                 }
 
-                console.log('sky debug 3004 queryObject are ', queryObject);
             } else {
                 textToDisplay = truncateText(answerText);
             }
@@ -325,30 +305,6 @@ function WorkGPT() {
         });
 
         speakMessage(textToDisplay, true);
-
-        // const supportedVoices = window.speechSynthesis.getVoices();
-        // const utterance = new SpeechSynthesisUtterance(textToDisplay);
-        // if (language !== 'en-US') {
-        //     utterance.voice = supportedVoices.find((voice) => voice.lang === language);
-        // }
-
-        // utterance.lang = language;
-        // utterance.rate = 0.9;
-
-        // utterance.onstart = () => {
-        //     console.log('Speech started');
-        //     if (speechRecognition) {
-        //         speechRecognition.stop();
-        //     }
-        // };
-
-        // utterance.onend = () => {
-        //     console.log('Speech ended');
-        //     if (speechRecognition) {
-        //         speechRecognition.start();
-        //     }
-        // };
-        // synth.speak(utterance);
 
         setAnswering(false);
         newChatHistoryMap[newTemplate] = newPromptArray;
@@ -508,7 +464,11 @@ function WorkGPT() {
 
             speechRecognition.onend = (event) => {
                 console.log(`onend: ${JSON.stringify(event)}`);
+                // if (playing && !synth.speaking) {
                 if (playing && !synth.speaking) {
+                    speechRecognition.stop();
+                    speechRecognition.start();
+                } else if (!playing) {
                     setPlaying(false);
                 }
             }
@@ -720,19 +680,14 @@ function WorkGPT() {
                 return;
             }
 
-            console.log('sky debug 6001 firstRecord are ', firstRecord);
-
             const availableKeys = Object.keys(firstRecord).filter((recordKey) => {
                 return recordKey !== 'attributes'
             });
 
-            console.log('sky debug 6002 availableKeys are ', availableKeys);
             if (availableKeys.length < 2) {
                 console.log('There is not enough dimension in the data');
                 return;
             }
-            console.log('sky debug 6003 first type is ', typeof firstRecord[availableKeys[0]]);
-            console.log('sky debug 6004 second type is ', typeof firstRecord[availableKeys[1]]);
 
             if (typeof firstRecord[availableKeys[0]] === 'string') {
                 primary = availableKeys[0];
@@ -800,9 +755,9 @@ function WorkGPT() {
                             <Button variant="contained" disabled={!playing} onClick={handleStopClick}>Stop</Button>
                             <Button variant="contained" disabled={playing} onClick={handleResetClick}>Reset</Button>
                         </Box>
-                        <Box align="center" sx={{ display: devDisplay }}>
+                        <Box align="center">
                             <FormControl component="fieldset" variant="standard" align='left'>
-                                <FormControl variant="standard">
+                                <FormControl variant="standard" sx={{ display: devDisplay }}>
                                     <LanguageSelect
                                         onChange={handleLanguageChange}
                                         disabled={playing}
@@ -816,6 +771,7 @@ function WorkGPT() {
                                         }
                                         label="Noise Suppression"
                                         disabled={playing}
+                                        sx={{ display: devDisplay }}
                                     />
                                     <FormControlLabel
                                         control={
@@ -823,10 +779,11 @@ function WorkGPT() {
                                         }
                                         label="Auto Gain Control"
                                         disabled={playing}
+                                        sx={{ display: devDisplay }}
                                     />
                                 </FormGroup>
                                 <FormControl variant="standard" sx={{ mb: 1 }}>
-                                    <InputLabel id="model-select-label" variant="standard">Model</InputLabel>
+                                    <InputLabel id="model-select-label" variant="standard" sx={{ display: devDisplay }}>Model</InputLabel>
                                     <Select
                                         labelId="model-select-label"
                                         id="model-select"
@@ -834,6 +791,7 @@ function WorkGPT() {
                                         onChange={handleModelChange}
                                         disabled={playing}
                                         value={model}
+                                        sx={{ display: devDisplay }}
                                     >
                                         <MenuItem value="text-ada-001">text-ada-001</MenuItem>
                                         <MenuItem value="text-babbage-001">text-babbage-001</MenuItem>
