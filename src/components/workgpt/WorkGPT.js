@@ -38,6 +38,10 @@ const MAX_HISTORY = 1000;
 
 function WorkGPT() {
 
+    // block | none
+    const debug = false;
+    const devDisplay = debug ? 'block' : 'none';
+
     const [state, setState] = useState({
         language: 'en-US',
         noiseCanceling: true,
@@ -732,13 +736,9 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
 
     const handleRestRequestClick = () => {
         const transcriptDiv = document.querySelector('#transcript-div');
-        transcriptDiv.innerHTML = 'Let\'s start. Show me the revenue from last year group by city.';
+        transcriptDiv.innerHTML = 'Let\'s start. Show me all the revenue';
         processAnswer();
     }
-
-    // block | none
-    const debug = false;
-    const devDisplay = debug ? 'block' : 'none';
 
     return (
         <Container component="main" sx={{ mb: 4 }}>

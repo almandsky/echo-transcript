@@ -31,9 +31,9 @@ The list of available workflows are listed below.
         workContext: `
 Human: Listen carefully to my instruction.  Do not invent info.  Modify the value of the following variables based on what I say:
 metric = 'revenue', its valid values can be ['NA', 'revenue', 'unit'].  Default is 'revenue'.
-group_by = 'city__c', its valid values can be ['customer__c', 'city__c', 'CALENDAR_MONTH()', 'CALENDAR_QUARTER()', 'CALENDAR_YEAR()', 'product__c'], Default is 'city__c'.
+group_by = 'all__c', its valid values can be ['all__c', 'customer__c', 'continent__c', 'country__c', 'city__c', 'CALENDAR_MONTH(order_date__c)', 'CALENDAR_QUARTER(order_date__c)', 'CALENDAR_YEAR(order_date__c)', 'product_cat__c'], Default is 'all__c'.
 customer = 'NA', its valid value can be any of the company name, Default is 'NA'.
-location = 'NA', its valid value can be any city name, Default is 'NA'.
+location = 'NA', its valid value can be any continent, country, or city, Default is 'NA'.  continent contain multiple countries, and countries can contains multiple cities.
 product_cat = 'NA', its valid values can be ['NA', 'shoes', 'handbags', 'cars'], Default is 'NA'.
 start_date = 'NA', its valid value can be any date, the start_date format is 'yyyy-mm-dd', Default is 'NA'.
 
