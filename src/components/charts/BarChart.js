@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from "prop-types";
 import { Chart } from 'react-charts';
 import Grid from '@mui/material/Grid';
 
@@ -34,5 +35,9 @@ const BarChart = ({ data }) => {
         </Grid>
     );
 }
+
+BarChart.propTypes = {
+    data: PropTypes.object.isRequired
+  };
 
 export default BarChart;

@@ -43,10 +43,6 @@ function TalkGPT() {
         autoGainControl,
     } = state;
 
-    const chatHistoryMap = {};
-
-
-
     const [playing, setPlaying] = useState(false);
     const [localStream, setStream] = useState(null);
     const [speechRecognition, setRecognition] = useState(null);

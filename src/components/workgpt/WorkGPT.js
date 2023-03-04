@@ -66,8 +66,6 @@ function WorkGPT() {
 
     const [selectedTemplate, setSelectedTemplate] = useState('Overall Workflow');
     const [currentWorkContext, setCurrentWorkContext] = useState('');
-    const [currentActions, setCurrentActions] = useState([]);
-    const [suggestedAction, setSuggestedAction] = useState(null);
     const [soqlQuery, setSoqlQuery] = useState(``);
 
     const [chartData, setChartData] = useState(null);
@@ -633,10 +631,9 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
         if (!template) {
             return;
         }
-        const { workContext, actions } = template;
+        const { workContext } = template;
 
         setCurrentWorkContext(workContext);
-        setCurrentActions(actions);
     }
 
     const handleTemplateChange = (event, newValue) => {
@@ -758,14 +755,14 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                         </Box>
                         <Box align="center">
                             <FormControl component="fieldset" variant="standard" align='left'>
-                                <FormControl variant="standard" sx={{ display: devDisplay }}>
+                                { debug && <FormControl variant="standard" sx={{ display: devDisplay }}>
                                     <LanguageSelect
                                         onChange={handleLanguageChange}
                                         disabled={playing}
                                         value={language}
                                     />
-                                </FormControl>
-                                <FormGroup>
+                                </FormControl>}
+                                { debug && <FormGroup>
                                     <FormControlLabel
                                         control={
                                             <Checkbox checked={noiseCanceling} onChange={handleNoiseCancelingChange} id="noise-canceling-checkbox" name="noise-canceling" />
@@ -782,8 +779,8 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                                         disabled={playing}
                                         sx={{ display: devDisplay }}
                                     />
-                                </FormGroup>
-                                <FormControl variant="standard" sx={{ mb: 1 }}>
+                                </FormGroup>}
+                                { debug && <FormControl variant="standard" sx={{ mb: 1 }}>
                                     <InputLabel id="model-select-label" variant="standard" sx={{ display: devDisplay }}>Model</InputLabel>
                                     <Select
                                         labelId="model-select-label"
@@ -799,7 +796,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                                         <MenuItem value="text-curie-001">text-curie-001</MenuItem>
                                         <MenuItem value="text-davinci-003">text-davinci-003</MenuItem>
                                     </Select>
-                                </FormControl>
+                                </FormControl>}
                                 <FormControl variant="standard">
                                     <InputLabel id="template-select-label" variant="standard">Current Context</InputLabel>
                                     <Select
@@ -850,7 +847,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                         <Typography variant="caption">chatGPT said:</Typography>
                         <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking work' : 'work'}></pre></Card>
                     </Grid>
-                    <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
+                    { debug && <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
                         <TextField
                             id="soql-input"
                             label="SOQL Query"
@@ -861,8 +858,8 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                             value={soqlQuery}
                             onChange={handleQueryChange}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
+                    </Grid>}
+                    { debug && <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
                         <TextField
                             id="context-input"
                             label="Work Context"
@@ -873,7 +870,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                             value={currentWorkContext}
                             onChange={handleWorkContextChange}
                         />
-                    </Grid>
+                    </Grid>}
                     <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
                         <TextField
                             id="text-input"
@@ -887,10 +884,10 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                         />
                         <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
                     </Grid>
-                    <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
+                    { debug && <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
                         <Button onClick={handleQueryClick}>Gen Report</Button>
                         <Button onClick={handleRestRequestClick}>Test request</Button>
-                    </Grid>
+                    </Grid>}
                 </Grid>
                 <Prompt
                     when={playing}
