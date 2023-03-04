@@ -801,11 +801,11 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                                     </Select>
                                 </FormControl>
                                 <FormControl variant="standard">
-                                    <InputLabel id="template-select-label" variant="standard">Work Template</InputLabel>
+                                    <InputLabel id="template-select-label" variant="standard">Current Context</InputLabel>
                                     <Select
                                         labelId="template-select-label"
                                         id="template-select"
-                                        label="Work Template"
+                                        label="Current Context"
                                         onChange={handleTemplateChange}
                                         value={selectedTemplate}
                                     >
