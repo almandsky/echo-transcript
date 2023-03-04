@@ -468,12 +468,9 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
 
             speechRecognition.onend = (event) => {
                 console.log(`onend: ${JSON.stringify(event)}`);
-                // if (playing && !synth.speaking) {
                 if (playing && !synth.speaking) {
                     speechRecognition.stop();
                     speechRecognition.start();
-                } else if (!playing) {
-                    setPlaying(false);
                 }
             }
 
@@ -526,6 +523,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
             'event_label': 'Stop Work with chatGPT'
         });
         if (speechRecognition) {
+            speechRecognition.onend = null;
             speechRecognition.stop();
         }
 
@@ -592,7 +590,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
             await startProcess();
             speakMessage('Let\'s start!');
         } else {
-            stopProcess();
+            stopProcess(true);
         }
 
 
@@ -605,6 +603,9 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
 
     const handleStopClick = () => {
         setPlaying(false);
+        if (speechRecognition) {
+            speechRecognition.stop();
+        }
     };
 
     const handleResetClick = () => {
