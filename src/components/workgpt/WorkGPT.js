@@ -39,7 +39,7 @@ const MAX_HISTORY = 1000;
 function WorkGPT() {
 
     // block | none
-    const debug = false;
+    const debug = true;
     const devDisplay = debug ? 'block' : 'none';
 
     const [state, setState] = useState({
@@ -80,8 +80,6 @@ function WorkGPT() {
     useEffect(() => {
         textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
     }, [textFieldRef.current?.value]);
-
-    // let template = '';
 
 
     const truncateText = (inputText) => {
@@ -218,15 +216,17 @@ function WorkGPT() {
             // parse the parameter
 
             // ` show(metric, group_by, customer, location, start_date)`
-            const regex = /show\((.*)\)/;
-            const match = answerText.match(regex);
+            // const regex = /show\((.*)\)/;
+            // const match = answerText.match(regex);
+            const matches = answerText.split('Parameters Start');
 
             const queryObject = {};
 
-            if (match) {
-                const rawParams = match[1];
+            if (matches.length > 1) {
+                const reportIntend = matches[0];
+                const rawParams = matches[1].trim();
 
-                const params = rawParams.split(',');
+                const params = rawParams.split('\n');
 
                 if (params[0].indexOf('=') >= 0) {
                     params.forEach((param) => {
@@ -274,7 +274,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                         await genChart(queryText);
 
                         setSoqlQuery(queryText);
-                        textToDisplay = 'Generating report';
+                        textToDisplay = `Generating report for ${reportIntend}`;
                     } catch (err) {
                         textToDisplay = 'Failed to generate report';
                     }
@@ -668,14 +668,14 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
         setSoqlQuery(event.target.value);
     };
 
-    const genChart = async (soqlQuery) => {
+    const genChart = async (soqlQuery, metric = 'revenue') => {
         const sourceData = await makeQuery(soqlQuery);
 
         if (sourceData && sourceData.records && sourceData.records.length) {
             const { records } = sourceData;
             const firstRecord = records[0];
-            let primary = null;
-            let secondary = null;
+            let primary = metric;
+            let secondary = [];
 
             if (firstRecord.attributes.type !== 'AggregateResult') {
                 console.log('This is not aggregation data, skip to process');
@@ -691,25 +691,41 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                 return;
             }
 
-            if (typeof firstRecord[availableKeys[0]] === 'string') {
-                primary = availableKeys[0];
-                secondary = availableKeys[1];
-            } else {
-                primary = availableKeys[1];
-                secondary = availableKeys[0];
-            }
+
+            availableKeys.forEach((key) => {
+                if (key.toLowerCase() !== metric.toLowerCase()) {
+                    secondary.push(key);
+                }
+            });
+
+            // if (typeof firstRecord[availableKeys[0]] === 'string') {
+            //     primary = availableKeys[0];
+            //     secondary = availableKeys[1];
+            // } else {
+            //     primary = availableKeys[1];
+            //     secondary = availableKeys[0];
+            // }
 
             const data = sourceData.records.map((record) => {
-                return {
-                    'primary': record[primary],
-                    'secondary': record[secondary]
-                }
+                const output = {
+                    [primary]: record[primary]
+                };
+
+                secondary.forEach((secondaryKey) => {
+                    output[secondaryKey] = record[secondaryKey];
+                });
+
+                return output;
             })
+
+            console.log(data);
 
             setChartData([
                 {
-                    label: secondary,
-                    data
+                    label: metric,
+                    data,
+                    primary,
+                    secondary
                 }
             ]);
         }
@@ -734,7 +750,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
 
     const handleRestRequestClick = () => {
         const transcriptDiv = document.querySelector('#transcript-div');
-        transcriptDiv.innerHTML = 'Let\'s start. Show me all the revenue';
+        transcriptDiv.innerHTML = 'Let\'s start. Show me all the revenue group by country and product';
         processAnswer();
     }
 
@@ -821,7 +837,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                     <Grid item xs={12} sm={4}></Grid>
                     <Grid item xs={12} sm={12}>
                         {
-                            selectedTemplate === 'Analytics Workflow' && <BarChart data={chartData} />
+                            selectedTemplate === 'Analytics Workflow' && <BarChart data={chartData} primary={chartData.primary} secondary={chartData.secondary} />
                         }
                         {
                             selectedTemplate === 'Workout Workflow' && (

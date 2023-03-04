@@ -31,7 +31,7 @@ The list of available workflows are listed below.
         workContext: `
 Human: Listen carefully to my instruction.  Do not invent info.  Modify the value of the following variables based on what I say:
 metric = 'revenue', its valid values can be ['NA', 'revenue', 'unit'].  Default is 'revenue'.
-group_by = 'all__c', its valid values can be ['all__c', 'customer__c', 'continent__c', 'country__c', 'city__c', 'CALENDAR_MONTH(order_date__c)', 'CALENDAR_QUARTER(order_date__c)', 'CALENDAR_YEAR(order_date__c)', 'product_cat__c'], Default is 'all__c'.
+group_by = 'all__c', its valid values can be one or multiple values from ['all__c', 'customer__c', 'continent__c', 'country__c', 'city__c', 'CALENDAR_MONTH(order_date__c)', 'CALENDAR_QUARTER(order_date__c)', 'CALENDAR_YEAR(order_date__c)', 'product_cat__c'], Default is 'all__c'.
 customer = 'NA', its valid value can be any of the company name, Default is 'NA'.
 location = 'NA', its valid value can be any continent, country, or city, Default is 'NA'.  continent contain multiple countries, and countries can contains multiple cities.
 product_cat = 'NA', its valid values can be ['NA', 'shoes', 'handbags', 'cars'], Default is 'NA'.
@@ -62,7 +62,15 @@ OLAP data is typically stored in a star schema or snowflake schema in a relation
 
 After each question, Reply in this format:
 
-\` show(metric=<metric>, group_by=<group_by>, customer=<customer>, location=<location>, product_cat=<product_cat>, start_date=<start_date>) \`
+\`
+Parameters Start
+metric=<metric>
+group_by=<group_by>
+customer=<customer>
+location=<location>
+product_cat=<product_cat>
+start_date=<start_date>
+\`
 
 if you cannot find any match, clarify with the user.
 

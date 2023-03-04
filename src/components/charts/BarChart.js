@@ -3,23 +3,27 @@ import PropTypes from "prop-types";
 import { Chart } from 'react-charts';
 import Grid from '@mui/material/Grid';
 
-const BarChart = ({ data }) => {
+const BarChart = ({ data, primary = '', secondary = [] }) => {
 
     const primaryAxis = React.useMemo(
         () => ({
-            getValue: datum => datum.primary,
+            getValue: datum => primary,
         }),
         []
     )
 
     const secondaryAxes = React.useMemo(
-        () => [
-            {
-                getValue: datum => datum.secondary,
-                elementType: 'bar',
-                min: 0
-            },
-        ],
+        () => {
+            secondary.map((secondaryKey) => {
+                return {
+                    getValue: datum => {
+                        return secondaryKey;
+                    },
+                    elementType: 'bar',
+                    min: 0
+                };
+            })  
+        },
         []
     )
 
@@ -37,7 +41,9 @@ const BarChart = ({ data }) => {
 }
 
 BarChart.propTypes = {
-    data: PropTypes.object.isRequired
+    data: PropTypes.object.isRequired,
+    // primary: PropTypes.string.isRequired,
+    // secondary: PropTypes.array.isRequired
   };
 
 export default BarChart;
