@@ -55,6 +55,7 @@ export const paramsToSoql = (rawParams) => {
             : queryObject.group_by;
 
         const whereParams = [];
+        const orderByParams = []
 
         if (queryObject.continent && queryObject.continent !== 'NA') {
             whereParams.push(`continent__c = '${queryObject.continent}'`);
@@ -80,6 +81,11 @@ export const paramsToSoql = (rawParams) => {
             whereParams.push(`order_date__c < ${queryObject.end_date}`);
         }
 
+        if (queryObject.order_by && queryObject.order_by !== 'NA') {
+            orderByParams.push(`${queryObject.order_by}`);
+        }
+        orderByParams.push(metricParam);
+
         const whereText = whereParams.length
             ? `WHERE ${whereParams.join(' AND ')}`
             : ''
@@ -93,7 +99,7 @@ export const paramsToSoql = (rawParams) => {
             SELECT ${groupByParamSelect}, ${metricParam} ${queryObject.metric} FROM Order__c
                 ${whereText}
                 GROUP BY ${groupByParam} 
-                ORDER BY ${metricParam}`;
+                ORDER BY ${orderByParams.join(', ')}`;
     }
 
     return queryText
