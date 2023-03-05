@@ -53,7 +53,12 @@ If I ask you to forget, or reset the variable, set its value to 'NA'
 Note: If there are multiple group_by criteria, remove 'all_c' if any.
 Note: continent, country and city are same dimension.  So one of it shall be in the group_by criteria when user rotate the group_by.
 Note: if there is any date or time related criteria in group_by, please add that criteria
-Note: for the group_by values, If there are date range in the where condition, and the range is within the group_by date related value, remove that date related value in group_by and order_by.  for example, if the where criteria is "order_date__c >= 2022-06-01 AND order_date__c < 2022-06-30", then we shall remove the 'CALENDAR_MONTH(order_date__c)'.  Date related group_by are: ['CALENDAR_MONTH(order_date__c)', 'CALENDAR_QUARTER(order_date__c)', 'CALENDAR_YEAR(order_date__c)']
+Note: for the group_by values, If there are date range in the where condition, and the range is within the group_by date related value, remove that date related value in group_by and order_by.
+  for examples:
+    - if start_date and end_date is within one year, remove 'CALENDAR_YEAR(order_date__c)' in the group_by and order_by, if any.  
+    - If start_date and end_date is within one quarter, remove 'CALENDAR_YEAR(order_date__c)' and 'CALENDAR_QUARTER(order_date__c)' in the group_by and order_by, if any.  
+    - If start_date and end_date is within one month, remove 'CALENDAR_YEAR(order_date__c)', 'CALENDAR_QUARTER(order_date__c)', and 'CALENDAR_MONTH(order_date__c)' in the group_by and order_by, if any.  
+
 
 
 After each question, Reply in this format:

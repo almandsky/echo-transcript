@@ -110,3 +110,33 @@ currentStep=<step name>
 
     return response;
 }
+
+export const reportIntendSummary = async ({ model, currentWorkContext, newPrompt, callback }) => {
+    const additionalPrompt = `
+
+
+------------------------------------------
+
+Based on the above context and chat history, what is the purpose of reports that user want?
+
+Please help to provide a short summary title for the report.
+
+Reply in this format:
+
+\`
+<Report Title>
+\`
+
+    `;
+
+    const response = await generateChat({
+        model,
+        currentWorkContext,
+        newPrompt,
+        additionalPrompt,
+        temperature: 0.1,
+        callback,
+    });
+
+    return response;
+}

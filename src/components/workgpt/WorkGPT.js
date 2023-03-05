@@ -25,7 +25,7 @@ import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
 import workTemplates from './workTemplates';
-import { generateChat, intentDetection, progressTracker } from '../common/systemWorkers';
+import { generateChat, intentDetection, progressTracker, reportIntendSummary } from '../common/systemWorkers';
 import BarChart from '../charts/BarChart';
 
 import { genChartData } from '../common/utils';
@@ -68,7 +68,7 @@ function WorkGPT() {
     const [soqlQuery, setSoqlQuery] = useState(``);
 
     const [chartData, setChartData] = useState(null);
-    const [testMessage, setTestMessage] = useState('');
+    const [testMessage, setTestMessage] = useState('Show me revenue since beginning of 2022 by month');
 
     const [chatHistory, setChatHistory] = useState([]);
     const [chatHistoryMap, setChatHistoryMap] = useState({});
@@ -216,9 +216,20 @@ function WorkGPT() {
                         const chartGenerated = await genChart(queryText, metric);
     
                         setSoqlQuery(queryText);
+
                         if (chartGenerated) {
-                            textToDisplay = reportIntend
-                                ? `Generated chart for ${reportIntend}`
+                            const reportIntentText = await reportIntendSummary({
+                                model,
+                                currentWorkContext: newWorkContext,
+                                newPrompt,
+                                temperature
+                            });
+
+                            console.log('sky debug 5001 reportIntentText is ', reportIntentText);
+
+                            const reportTitle = reportIntentText.replace('Report Title: ', '');
+                            textToDisplay = reportTitle
+                                ? `Generated chart for ${reportTitle}`
                                 : '';
                         } else {
                             textToDisplay = 'No data found';
@@ -642,12 +653,16 @@ function WorkGPT() {
         await genChart(soqlQuery, 'revenue');
     };
 
-    const handleRestRequestClick = () => {
+    const handleRestRequestClick = async () => {
         const transcriptDiv = document.querySelector('#transcript-div');
         const answerDiv = document.querySelector('#answer-div');
         answerDiv.innerHTML = '';
         transcriptDiv.innerHTML = testMessage;
-        processAnswer();
+        await processAnswer();
+
+        if (speechRecognition) {
+            speechRecognition.stop();
+        }
     }
 
     return (

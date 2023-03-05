@@ -25,6 +25,8 @@ export const formatRecord = (record) => {
             record[key] = formatMonth(record[key]);
         } else if (key === 'quarter') {
             record[key] = `Q${record[key]}`;
+        } else if (key === 'year') {
+            record[key] = `${record[key]}`; // convert it to string
         }
     })
 };
