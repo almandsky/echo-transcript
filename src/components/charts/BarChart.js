@@ -3,35 +3,37 @@ import PropTypes from "prop-types";
 import { Chart } from 'react-charts';
 import Grid from '@mui/material/Grid';
 
-const BarChart = ({ data, primary = '', secondary = [] }) => {
+const BarChart = ({ chartData }) => {
 
-    const primaryAxis = React.useMemo(
+    console.log('sky debug 5001 data is ', chartData);
+    console.log('sky debug 5002 primary is ', chartData.primary);
+    console.log('sky debug 5003 secondary is ', chartData.secondary);
+
+    const primaryAxis = chartData.primary && React.useMemo(
         () => ({
-            getValue: datum => primary,
+            getValue: datum => datum[chartData.primary],
         }),
         []
     )
 
-    const secondaryAxes = React.useMemo(
-        () => {
-            secondary.map((secondaryKey) => {
-                return {
-                    getValue: datum => {
-                        return secondaryKey;
-                    },
-                    elementType: 'bar',
-                    min: 0
-                };
-            })  
-        },
-        []
-    )
+    console.log('sky debug 5004 primaryAxis is ', primaryAxis);
+
+
+    const secondaryAxes = chartData.secondary.map((secondaryKey) => {
+            return {
+                getValue: datum => datum[secondaryKey],
+                elementType: 'bar',
+                min: 0
+            };
+        });
+
+    console.log('sky debug 5006 secondaryAxes is ', secondaryAxes);
 
     return (
-        data && <Grid item xs={12} sm={12} sx={{ height: 200 }}>
+        chartData.data && primaryAxis && secondaryAxes && secondaryAxes.length && <Grid item xs={12} sm={12} sx={{ height: 200 }}>
             <Chart
                 options={{
-                    data,
+                    data: chartData.data,
                     primaryAxis,
                     secondaryAxes,
                 }}
@@ -40,10 +42,10 @@ const BarChart = ({ data, primary = '', secondary = [] }) => {
     );
 }
 
-BarChart.propTypes = {
-    data: PropTypes.object.isRequired,
-    // primary: PropTypes.string.isRequired,
-    // secondary: PropTypes.array.isRequired
-  };
+// BarChart.propTypes = {
+//     data: PropTypes.array.isRequired,
+//     primary: PropTypes.string.i,
+//     secondary: PropTypes.array.isRequired
+//   };
 
 export default BarChart;

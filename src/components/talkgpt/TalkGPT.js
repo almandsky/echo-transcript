@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Prompt } from 'react-router-dom';
-import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -21,13 +20,11 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
+import { generateChat } from '../common/systemWorkers';
 
 const HUMAN_PREFIX = 'Human:';
-const AI_PREFIX = 'AI:';
 
-const AI_ENDPOINT = '/completions';
-
-const MAX_HISTORY = 1000;
+const MAX_HISTORY = 10;
 
 function TalkGPT() {
 
@@ -107,18 +104,12 @@ function TalkGPT() {
         });
 
         setAnswering(true);
-        const response = await axios.post(AI_ENDPOINT, {
-            "model": model,
-            "prompt": newPrompt,
-            "temperature": 0.5,
-            "max_tokens": 255,
-            "top_p": 1,
-            "frequency_penalty": 0.5,
-            "presence_penalty": 0.5,
-            "stop": [`${HUMAN_PREFIX}`, `${AI_PREFIX}`]
-        });
 
-        const answerText = response.data;
+        const answerText = await generateChat({
+            model,
+            newPrompt,
+            temperature: 0.5
+        });
 
         newPromptArray.push(answerText);
 

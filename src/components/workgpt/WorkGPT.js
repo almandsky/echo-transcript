@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Prompt } from 'react-router-dom';
-import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -26,21 +25,21 @@ import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
 import workTemplates from './workTemplates';
-import { intentDetection } from './systemWorkers';
+import { generateChat, intentDetection } from '../common/systemWorkers';
 import BarChart from '../charts/BarChart';
 
-const HUMAN_PREFIX = 'Human:';
-const AI_PREFIX = 'AI:';
+import { genChartData } from '../common/utils';
+import { extractParameters, paramsToSoql } from '../common/messageToActions';
 
-const AI_ENDPOINT = '/completions';
+const HUMAN_PREFIX = 'Human:';
 
 const MAX_HISTORY = 1000;
 
 function WorkGPT() {
 
     // block | none
-    const debug = true;
-    const devDisplay = debug ? 'block' : 'none';
+    const debug = false;
+    const testManualInput = true;
 
     const [state, setState] = useState({
         language: 'en-US',
@@ -69,8 +68,7 @@ function WorkGPT() {
     const [soqlQuery, setSoqlQuery] = useState(``);
 
     const [chartData, setChartData] = useState(null);
-
-
+    const [testMessage, setTestMessage] = useState('');
 
     const [chatHistory, setChatHistory] = useState([]);
     const [chatHistoryMap, setChatHistoryMap] = useState({});
@@ -78,7 +76,9 @@ function WorkGPT() {
     const textFieldRef = useRef(null);
 
     useEffect(() => {
-        textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
+        if (textFieldRef && textFieldRef.current) {
+            textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
+        }
     }, [textFieldRef.current?.value]);
 
 
@@ -112,8 +112,6 @@ function WorkGPT() {
             return;
         }
 
-
-
         setAnswering(true);
 
         // detect intent
@@ -128,7 +126,7 @@ function WorkGPT() {
 
         // set the history to that context
 
-        // speak the response
+       
 
         // detect the intent
         const newChatHistory = chatHistory;
@@ -151,7 +149,7 @@ function WorkGPT() {
                 newTemplate = newWorkflow;
                 const switchContextMessage = `\n\n Switch context to ${newWorkflow}\n\n`;
                 newChatHistory.push(switchContextMessage);
-                // speakMessage(switchContextMessage)
+                // speakMessage(switchContextMessage, true);
             }
         }
 
@@ -179,25 +177,18 @@ function WorkGPT() {
 
         const newWorkContext = workTemplates[newTemplate].workContext;
 
-        // if it is workout context, add the current state to the prompt
-
         const temperature = newTemplate === 'Overall Workflow'
             ? 0.5
-            : 0.1
+            : 0.3
 
-        const response = await axios.post(AI_ENDPOINT, {
-            "model": model,
-            "prompt": newWorkContext + '\n\n' + newPrompt,
-            "temperature": temperature,
-            "max_tokens": 500,
-            "top_p": 1,
-            "frequency_penalty": 0.2,
-            "presence_penalty": 0.2,
-            "stop": [`${HUMAN_PREFIX}`, `${AI_PREFIX}`]
+        const answerText = await generateChat({
+            model,
+            currentWorkContext: newWorkContext,
+            newPrompt,
+            temperature
         });
 
-        const answerText = response.data;
-
+        // store the chat history from Human and AI
         newPromptArray.push(answerText);
         newChatHistory.push(HUMAN_PREFIX + textToRead);
 
@@ -213,85 +204,36 @@ function WorkGPT() {
         let textToDisplay = '';
 
         if (newTemplate === 'Analytics Workflow') {
-            // parse the parameter
+            const { rawParams, reportIntend } = extractParameters(answerText);
 
-            // ` show(metric, group_by, customer, location, start_date)`
-            // const regex = /show\((.*)\)/;
-            // const match = answerText.match(regex);
-            const matches = answerText.split('Parameters Start');
-
-            const queryObject = {};
-
-            if (matches.length > 1) {
-                const reportIntend = matches[0];
-                const rawParams = matches[1].trim();
-
-                const params = rawParams.split('\n');
-
-                if (params[0].indexOf('=') >= 0) {
-                    params.forEach((param) => {
-                        const [key, value] = param.split('=');
-                        queryObject[key.trim()] = value.trim().replaceAll('\'', '');
-                    })
-                }
-
-                if (queryObject.metric && queryObject.metric !== 'NA' && queryObject.group_by && queryObject.group_by !== 'NA') {
-
-                    const metricParam = queryObject.metric === 'revenue'
-                        ? 'sum(price__c)'
-                        : 'count(quantity__c)';
-
-                    const groupByParam = queryObject.group_by.indexOf('CALENDAR') >= 0
-                        ? queryObject.group_by.replace('()', '(order_date__c)')
-                        : queryObject.group_by;
-
-                    const whereParams = [];
-
-                    if (queryObject.location && queryObject.location !== 'NA') {
-                        whereParams.push(`city__c = '${queryObject.location}'`);
-                    }
-
-                    if (queryObject.product_cat && queryObject.product_cat !== 'NA') {
-                        whereParams.push(`product__c = '${queryObject.product_cat}'`);
-                    }
-
-                    if (queryObject.start_date && queryObject.start_date !== 'NA') {
-                        whereParams.push(`order_date__c >= ${queryObject.start_date}`);
-                    }
-
-                    const whereText = whereParams.length
-                        ? `WHERE ${whereParams.join(' AND ')}`
-                        : ''
-
-                    const queryText = `
-SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
-    ${whereText}
-    GROUP BY ${groupByParam} 
-    ORDER BY ${metricParam}
-    LIMIT 10`;
-
+            if (rawParams) {
+                const soqlQueryOutput = paramsToSoql(rawParams);
+    
+                if (soqlQueryOutput) {
                     try {
-                        await genChart(queryText);
-
+                        const { queryText, metric } = soqlQueryOutput
+                        const chartGenerated = await genChart(queryText, metric);
+    
                         setSoqlQuery(queryText);
-                        textToDisplay = `Generating report for ${reportIntend}`;
+                        if (chartGenerated) {
+                            textToDisplay = reportIntend
+                                ? `Generated chart for ${reportIntend}`
+                                : '';
+                        } else {
+                            textToDisplay = 'No data found';
+                        }
                     } catch (err) {
+                        console.err(`Error during chart generation: ${err.message}`);
                         textToDisplay = 'Failed to generate report';
                     }
-
-
-
                 } else {
+                    // no valid SOQL generated.
                     textToDisplay = 'Cannot generate report, Please provide better instruction.';
                 }
-
             } else {
+                // no parameter found, then clarify with the users
                 textToDisplay = truncateText(answerText);
             }
-
-            // update report
-            // if report is updated, speak 'Report updated'
-
         } else if (newTemplate === 'Workout Workflow') {
             // keep track of the current state of the workout progress.
             // update the new workout status
@@ -300,6 +242,8 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
             // generic Q & A
             textToDisplay = truncateText(answerText);
         }
+
+        // type and speak the response
 
         typeMessage(answerDiv, textToDisplay, async () => {
             answerDiv.scrollTop = answerDiv.scrollHeight;
@@ -317,7 +261,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
 
     const handleOnclickTest = () => {
         const answerDiv = document.querySelector('#answer-div');
-        speakMessage(answerDiv.innerHTML, true);
+        speakMessage(answerDiv.innerHTML, false);
     };
 
     function typeMessage(element, message, callback) {
@@ -585,13 +529,11 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
     useEffect(async () => {
         // based on is playing or not, either start the audio or stop.
         if (playing) {
+            // speakMessage('Let\'s start!');
             await startProcess();
-            speakMessage('Let\'s start!');
         } else {
             stopProcess(true);
         }
-
-
     }, [playing]);
 
 
@@ -648,8 +590,6 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
     };
 
 
-
-
     const handleNoiseCancelingChange = (event, newValue) => {
         setState({
             ...state,
@@ -668,89 +608,33 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
         setSoqlQuery(event.target.value);
     };
 
-    const genChart = async (soqlQuery, metric = 'revenue') => {
-        const sourceData = await makeQuery(soqlQuery);
+    const handleTestMessageChange = (event) => {
+        setTestMessage(event.target.value);
+    };
 
-        if (sourceData && sourceData.records && sourceData.records.length) {
-            const { records } = sourceData;
-            const firstRecord = records[0];
-            let primary = metric;
-            let secondary = [];
+    const genChart = async (soqlQuery, metric) => {
+        setChartData(null);
 
-            if (firstRecord.attributes.type !== 'AggregateResult') {
-                console.log('This is not aggregation data, skip to process');
-                return;
-            }
+        const data = await genChartData(soqlQuery, metric);
 
-            const availableKeys = Object.keys(firstRecord).filter((recordKey) => {
-                return recordKey !== 'attributes'
-            });
-
-            if (availableKeys.length < 2) {
-                console.log('There is not enough dimension in the data');
-                return;
-            }
-
-
-            availableKeys.forEach((key) => {
-                if (key.toLowerCase() !== metric.toLowerCase()) {
-                    secondary.push(key);
-                }
-            });
-
-            // if (typeof firstRecord[availableKeys[0]] === 'string') {
-            //     primary = availableKeys[0];
-            //     secondary = availableKeys[1];
-            // } else {
-            //     primary = availableKeys[1];
-            //     secondary = availableKeys[0];
-            // }
-
-            const data = sourceData.records.map((record) => {
-                const output = {
-                    [primary]: record[primary]
-                };
-
-                secondary.forEach((secondaryKey) => {
-                    output[secondaryKey] = record[secondaryKey];
-                });
-
-                return output;
-            })
-
-            console.log(data);
-
-            setChartData([
-                {
-                    label: metric,
-                    data,
-                    primary,
-                    secondary
-                }
-            ]);
+        if (data) {
+            setChartData(data);
+            return true;
         }
+
+        return false;
     }
 
     const handleQueryClick = async () => {
-        await genChart(soqlQuery);
-    };
-
-    const makeQuery = async (query) => {
-        if (!query) {
-            console.error('Empty query!');
-            return;
-        }
-
-        const response = await axios.post('/query', {
-            query
-        });
-
-        return response?.data;
+        setSelectedTemplate('Analytics Workflow');
+        await genChart(soqlQuery, 'revenue');
     };
 
     const handleRestRequestClick = () => {
         const transcriptDiv = document.querySelector('#transcript-div');
-        transcriptDiv.innerHTML = 'Let\'s start. Show me all the revenue group by country and product';
+        const answerDiv = document.querySelector('#answer-div');
+        answerDiv.innerHTML = '';
+        transcriptDiv.innerHTML = testMessage;
         processAnswer();
     }
 
@@ -771,7 +655,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                         </Box>
                         <Box align="center">
                             <FormControl component="fieldset" variant="standard" align='left'>
-                                { debug && <FormControl variant="standard" sx={{ display: devDisplay }}>
+                                { debug && <FormControl variant="standard">
                                     <LanguageSelect
                                         onChange={handleLanguageChange}
                                         disabled={playing}
@@ -785,7 +669,6 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                                         }
                                         label="Noise Suppression"
                                         disabled={playing}
-                                        sx={{ display: devDisplay }}
                                     />
                                     <FormControlLabel
                                         control={
@@ -793,11 +676,10 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                                         }
                                         label="Auto Gain Control"
                                         disabled={playing}
-                                        sx={{ display: devDisplay }}
                                     />
                                 </FormGroup>}
                                 { debug && <FormControl variant="standard" sx={{ mb: 1 }}>
-                                    <InputLabel id="model-select-label" variant="standard" sx={{ display: devDisplay }}>Model</InputLabel>
+                                    <InputLabel id="model-select-label" variant="standard">Model</InputLabel>
                                     <Select
                                         labelId="model-select-label"
                                         id="model-select"
@@ -805,7 +687,6 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                                         onChange={handleModelChange}
                                         disabled={playing}
                                         value={model}
-                                        sx={{ display: devDisplay }}
                                     >
                                         <MenuItem value="text-ada-001">text-ada-001</MenuItem>
                                         <MenuItem value="text-babbage-001">text-babbage-001</MenuItem>
@@ -837,7 +718,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                     <Grid item xs={12} sm={4}></Grid>
                     <Grid item xs={12} sm={12}>
                         {
-                            selectedTemplate === 'Analytics Workflow' && <BarChart data={chartData} primary={chartData.primary} secondary={chartData.secondary} />
+                            selectedTemplate === 'Analytics Workflow' && chartData && chartData.data && <BarChart chartData={chartData} />
                         }
                         {
                             selectedTemplate === 'Workout Workflow' && (
@@ -863,7 +744,20 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                         <Typography variant="caption">chatGPT said:</Typography>
                         <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking work' : 'work'}></pre></Card>
                     </Grid>
-                    { debug && <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
+                    { (debug || testManualInput) && <Grid item xs={12} sm={12}>
+                        <TextField
+                            id="test-message-input"
+                            label="Test Message"
+                            variant="outlined"
+                            multiline
+                            sx={{ width: '100%' }}
+                            rows={2}
+                            value={testMessage}
+                            onChange={handleTestMessageChange}
+                        />
+                        <Button onClick={handleRestRequestClick}>Test request</Button>
+                    </Grid>}
+                    { (debug || testManualInput) && <Grid item xs={12} sm={12}>
                         <TextField
                             id="soql-input"
                             label="SOQL Query"
@@ -874,8 +768,9 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                             value={soqlQuery}
                             onChange={handleQueryChange}
                         />
+                        <Button onClick={handleQueryClick}>Gen Report</Button>
                     </Grid>}
-                    { debug && <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
+                    { debug && <Grid item xs={12} sm={12}>
                         <TextField
                             id="context-input"
                             label="Work Context"
@@ -887,7 +782,7 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                             onChange={handleWorkContextChange}
                         />
                     </Grid>}
-                    <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
+                    { debug && <Grid item xs={12} sm={12}>
                         <TextField
                             id="text-input"
                             label="Chat History"
@@ -896,14 +791,10 @@ SELECT ${groupByParam}, ${metricParam} ${queryObject.metric} FROM Order__c
                             sx={{ width: '100%' }}
                             rows={4}
                             value={chatHistory.join('\n')}
-                            inputRef={textFieldRef}
+                            inputRef={debug ? textFieldRef : null}
                         />
                         <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
-                    </Grid>
-                    { debug && <Grid item xs={12} sm={12} sx={{ display: devDisplay }}>
-                        <Button onClick={handleQueryClick}>Gen Report</Button>
-                        <Button onClick={handleRestRequestClick}>Test request</Button>
-                    </Grid>}
+                    </Grid> }
                 </Grid>
                 <Prompt
                     when={playing}
