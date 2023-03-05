@@ -68,7 +68,7 @@ function WorkGPT() {
     const [soqlQuery, setSoqlQuery] = useState(``);
 
     const [chartData, setChartData] = useState(null);
-    const [testMessage, setTestMessage] = useState('I want to do some workout');
+    const [testMessage, setTestMessage] = useState('');
 
     const [chatHistory, setChatHistory] = useState([]);
     const [chatHistoryMap, setChatHistoryMap] = useState({});
