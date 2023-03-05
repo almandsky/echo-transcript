@@ -77,3 +77,36 @@ Reply in this format:
 
     return response;
 }
+
+export const progressTracker = async ({ model, currentWorkContext, newPrompt, callback }) => {
+    const additionalPrompt = `
+
+
+------------------------------------------
+
+Based on the above context and chat history, what is the current step of the user is completed?
+
+Please list all the steps status for me.  
+
+Reply in this format:
+
+\`
+currentStep=<step name>
+
+<step name>=<step status> \t<Step Description>
+\`
+
+
+    `;
+
+    const response = await generateChat({
+        model,
+        currentWorkContext,
+        newPrompt,
+        additionalPrompt,
+        temperature: 0.1,
+        callback,
+    });
+
+    return response;
+}

@@ -20,12 +20,12 @@ const BarChart = ({ chartData }) => {
 
 
     const secondaryAxes = chartData.secondary.map((secondaryKey) => {
-            return {
-                getValue: datum => datum[secondaryKey],
-                elementType: 'bar',
-                min: 0
-            };
-        });
+        return {
+            getValue: datum => datum[secondaryKey],
+            elementType: 'bar',
+            min: 0
+        };
+    });
 
     console.log('sky debug 5006 secondaryAxes is ', secondaryAxes);
 
@@ -42,10 +42,8 @@ const BarChart = ({ chartData }) => {
     );
 }
 
-// BarChart.propTypes = {
-//     data: PropTypes.array.isRequired,
-//     primary: PropTypes.string.i,
-//     secondary: PropTypes.array.isRequired
-//   };
+BarChart.propTypes = {
+    chartData: PropTypes.object.isRequired
+};
 
 export default BarChart;

@@ -65,7 +65,7 @@ Each cell of the cube holds a number that represents some measure of the busines
 
 OLAP data is typically stored in a star schema or snowflake schema in a relational data warehouse or in a special-purpose data management system. Measures are derived from the records in the fact table and dimensions are derived from the dimension tables.
 
-
+Note: If there are multiple group_by criteria, remove 'all_c' if any.
 
 After each question, Reply in this format:
 
@@ -97,59 +97,32 @@ if you cannot find any match, clarify with the user.
     'Workout Workflow': {
         workContext: `
 
-# Workout to be done
+There are 3 kinds of workout user can perform.  There are dependencies between the workouts.
 
-## Workout 1
+The workout have 3 status, 'Not Started', 'In Progress', and 'Completed'.  Default status is 'Not Started'
 
-### Description
+User cannot start the next workout until the dependent workout is completed.  If there is no dependency, user can start that work out any time.
 
-Workout 1 is to run for 1 hour.
+# Running
 
-### NextWorkout
+Run for 1 hour.
 
-NextWorkout: Workout 3
+Dependent on: N/A
 
-### Dependency
+# Pushups
 
-N/A
+Do 100 push ups.
 
-Need to complete Workout 1 first.
+Dependent on: Swimming
 
-## Workout 2
+# Swimming
 
-### Description
+Swim for 30 mins.
 
-Workout 2 is to do 100 push ups.
+Dependent on: Running
 
-### NextWorkout
 
-NextWorkout: N/A
-
-### Dependency
-
-Cannot start Workout 2 before Workout 1 and Workout 3 are completed.
-
-All the Workouts completed.
-
-## Workout 3
-
-### Description
-
-Workout 3 is to swim for 30 mins.
-
-### NextWorkout
-
-NextWorkout: Workout 2
-
-### Dependency
-
-Cannot start Workout 2 before Workout 1 is completed.
-
-# Workout Status
-
-## Available Workout Status
-
-There are 2 Workout status: 'Not Started', 'Completed'.
+Please note that default status is 'Not Started'
 
 
         `,

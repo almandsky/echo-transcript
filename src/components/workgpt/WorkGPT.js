@@ -25,7 +25,7 @@ import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
 import workTemplates from './workTemplates';
-import { generateChat, intentDetection } from '../common/systemWorkers';
+import { generateChat, intentDetection, progressTracker } from '../common/systemWorkers';
 import BarChart from '../charts/BarChart';
 
 import { genChartData } from '../common/utils';
@@ -68,10 +68,11 @@ function WorkGPT() {
     const [soqlQuery, setSoqlQuery] = useState(``);
 
     const [chartData, setChartData] = useState(null);
-    const [testMessage, setTestMessage] = useState('');
+    const [testMessage, setTestMessage] = useState('I want to do some workout');
 
     const [chatHistory, setChatHistory] = useState([]);
     const [chatHistoryMap, setChatHistoryMap] = useState({});
+    const [workoutStatus, setWorkoutStatus] = useState('');
 
     const textFieldRef = useRef(null);
 
@@ -179,7 +180,7 @@ function WorkGPT() {
 
         const temperature = newTemplate === 'Overall Workflow'
             ? 0.5
-            : 0.3
+            : 0.1
 
         const answerText = await generateChat({
             model,
@@ -237,6 +238,17 @@ function WorkGPT() {
         } else if (newTemplate === 'Workout Workflow') {
             // keep track of the current state of the workout progress.
             // update the new workout status
+            
+            const workoutStatusResponse = await progressTracker({
+                model,
+                currentWorkContext: newWorkContext,
+                newPrompt: newPromptArray?.join('\n') + HUMAN_PREFIX + textToRead
+            })
+
+            setWorkoutStatus(workoutStatusResponse);
+
+            newPromptArray.push(workoutStatusResponse)
+
             textToDisplay = truncateText(answerText);
         } else {
             // generic Q & A
@@ -722,17 +734,20 @@ function WorkGPT() {
                         }
                         {
                             selectedTemplate === 'Workout Workflow' && (
-                                <Stepper activeStep={0} alternativeLabel>
-                                    <Step>
-                                        <StepLabel>Running</StepLabel>
-                                    </Step>
-                                    <Step>
-                                        <StepLabel>Swimming</StepLabel>
-                                    </Step>
-                                    <Step>
-                                        <StepLabel>Push-Ups</StepLabel>
-                                    </Step>
-                                </Stepper>
+                                <>
+                                    {/* <Stepper activeStep={0} alternativeLabel>
+                                        <Step>
+                                            <StepLabel>Running</StepLabel>
+                                        </Step>
+                                        <Step>
+                                            <StepLabel>Swimming</StepLabel>
+                                        </Step>
+                                        <Step>
+                                            <StepLabel>Push-Ups</StepLabel>
+                                        </Step>
+                                    </Stepper> */}
+                                    <Typography variant="caption"><pre>{workoutStatus}</pre></Typography>
+                                </>
                             )
                         }
                     </Grid>
