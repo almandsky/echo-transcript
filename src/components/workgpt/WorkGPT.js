@@ -228,9 +228,9 @@ function WorkGPT() {
 
                             console.log('sky debug 5001 reportIntentText is ', reportIntentText);
 
-                            const reportTitle = reportIntentText.replace('Report Title: ', '');
+                            const reportTitle = reportIntentText;
                             textToDisplay = reportTitle
-                                ? `Generated chart for ${reportTitle}`
+                                ? `${reportTitle}`
                                 : '';
                         } else {
                             textToDisplay = 'No data found';

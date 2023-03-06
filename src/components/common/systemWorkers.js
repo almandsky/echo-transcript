@@ -127,7 +127,9 @@ ${JSON.stringify(reportData, null, 4)}
 
 -------------------------------
 
-Please help to provide a short summary title for the report.  and give a summary of the data.
+Please help to provide a short summary title for the report.  and give a insights of the data only.
+
+Please also suggest what action user can take.
 
 Reply in this format:
 
@@ -135,7 +137,9 @@ Reply in this format:
 <Report Title>
 
 
-<Report Summary of the data>
+<Report Insights>
+
+<Suggested Actions>
 \`
 
     `;
