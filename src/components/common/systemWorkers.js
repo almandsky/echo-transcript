@@ -131,7 +131,7 @@ ${JSON.stringify(reportData, null, 4)}
 
 Please help to provide a short summary title for the report.  and give a insights of the data only.
 
-Please also suggest what action user can take.
+Please also suggest the most impactful suggested action user can take.
 
 Reply in this format:
 

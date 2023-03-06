@@ -243,7 +243,7 @@ function WorkGPT() {
                             textToDisplay = 'No data found';
                         }
                     } catch (err) {
-                        console.err(`Error during chart generation: ${err.message}`);
+                        console.error(`Error during chart generation: ${err.message}`);
                         textToDisplay = 'Failed to generate report';
                     }
                 } else {

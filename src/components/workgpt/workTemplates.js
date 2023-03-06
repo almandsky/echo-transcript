@@ -117,8 +117,6 @@ For the case status that is NOT 'Closed', user can add reminder to keep track of
 
 Once all the actions are completed, user can close the case.
 
-User need to follow up and take actions for the case status that is not 'Closed' if the user is the Owner.
-
         `,
         actions: [(answerText, callback) => {
             const formattedText = answerText;
