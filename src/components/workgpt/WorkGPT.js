@@ -729,9 +729,9 @@ function WorkGPT() {
                                         <MenuItem value="text-davinci-003">text-davinci-003</MenuItem>
                                     </Select>
                                 </FormControl>}
-                                <FormControl variant="standard">
+                                <FormControl variant="standard" align='center'>
+                                    <Typography variant="caption">Current Context</Typography>    
                                     <Stack direction="row" spacing={1}>
-                                        
                                         {
                                             Object.keys(workTemplates).map(((workTemplateKey) => {
                                                 return (
