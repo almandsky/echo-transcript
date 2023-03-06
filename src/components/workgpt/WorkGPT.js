@@ -5,9 +5,8 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Checkbox from '@mui/material/Checkbox';
+import Chip from '@mui/material/Chip';
 import Container from '@mui/material/Container';
-
-
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
@@ -16,13 +15,19 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
-
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
+// icons
+import DoneIcon from '@mui/icons-material/Done';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
+
+// internal imports
 import LanguageSelect from '../common/LanguageSelect';
 import workTemplates from './workTemplates';
 import { generateChat, intentDetection, progressTracker, reportIntendSummary } from '../common/systemWorkers';
@@ -30,6 +35,8 @@ import BarChart from '../charts/BarChart';
 
 import { genChartData } from '../common/utils';
 import { extractParameters, paramsToSoql } from '../common/messageToActions';
+
+import { HOME_FLOW, SALES_FLOW, SERVICES_FLOW } from '../common/constants';
 
 const HUMAN_PREFIX = 'Human:';
 
@@ -39,7 +46,7 @@ function WorkGPT() {
 
     // block | none
     const debug = false;
-    const testManualInput = true;
+    const testManualInput = false;
 
     const [state, setState] = useState({
         language: 'en-US',
@@ -63,7 +70,7 @@ function WorkGPT() {
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [model, setModel] = useState('text-davinci-003');
 
-    const [selectedTemplate, setSelectedTemplate] = useState('Overall Workflow');
+    const [selectedTemplate, setSelectedTemplate] = useState(HOME_FLOW);
     const [currentWorkContext, setCurrentWorkContext] = useState('');
     const [soqlQuery, setSoqlQuery] = useState(``);
 
@@ -72,7 +79,7 @@ function WorkGPT() {
 
     const [chatHistory, setChatHistory] = useState([]);
     const [chatHistoryMap, setChatHistoryMap] = useState({});
-    const [workoutStatus, setWorkoutStatus] = useState('');
+    const [caseStatus, setCaseStatus] = useState('');
 
     const textFieldRef = useRef(null);
 
@@ -132,7 +139,7 @@ function WorkGPT() {
         // detect the intent
         const newChatHistory = chatHistory;
 
-        const overallWorkContext = workTemplates['Overall Workflow'].workContext;
+        const overallWorkContext = workTemplates[HOME_FLOW].workContext;
         const intentText = await intentDetection({
             model,
             currentWorkContext: overallWorkContext,
@@ -178,7 +185,7 @@ function WorkGPT() {
 
         const newWorkContext = workTemplates[newTemplate].workContext;
 
-        const temperature = newTemplate === 'Overall Workflow'
+        const temperature = newTemplate === HOME_FLOW
             ? 0.5
             : 0.1
 
@@ -204,7 +211,7 @@ function WorkGPT() {
 
         let textToDisplay = '';
 
-        if (newTemplate === 'Analytics Workflow') {
+        if (newTemplate === SALES_FLOW) {
             const { rawParams } = extractParameters(answerText);
 
             if (rawParams) {
@@ -247,19 +254,19 @@ function WorkGPT() {
                 // no parameter found, then clarify with the users
                 textToDisplay = truncateText(answerText);
             }
-        } else if (newTemplate === 'Workout Workflow') {
-            // keep track of the current state of the workout progress.
-            // update the new workout status
+        } else if (newTemplate === SERVICES_FLOW) {
+            // keep track of the current state of the case progress.
+            // update the new case status
             
-            const workoutStatusResponse = await progressTracker({
+            const caseStatusResponse = await progressTracker({
                 model,
                 currentWorkContext: newWorkContext,
                 newPrompt: newPromptArray?.join('\n') + HUMAN_PREFIX + textToRead
             })
 
-            setWorkoutStatus(workoutStatusResponse);
+            setCaseStatus(caseStatusResponse);
 
-            newPromptArray.push(workoutStatusResponse)
+            newPromptArray.push(caseStatusResponse)
 
             textToDisplay = truncateText(answerText);
         } else {
@@ -650,7 +657,7 @@ function WorkGPT() {
     }
 
     const handleQueryClick = async () => {
-        setSelectedTemplate('Analytics Workflow');
+        setSelectedTemplate(SALES_FLOW);
         await genChart(soqlQuery, 'revenue');
     };
 
@@ -674,12 +681,12 @@ function WorkGPT() {
                     <Grid item xs={12} sm={4} sx={{ display: 'grid', gap: 2 }} id="controls">
                         <Box sx={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(3, 1fr)',
+                            gridTemplateColumns: 'repeat(2, 1fr)',
                             gap: 1
                         }} align="center">
-                            <Button variant="contained" disabled={playing} onClick={handleStartClick}>Start</Button>
-                            <Button variant="contained" disabled={!playing} onClick={handleStopClick}>Stop</Button>
-                            <Button variant="contained" disabled={playing} onClick={handleResetClick}>Reset</Button>
+                            <Button variant="contained" disabled={playing} onClick={handleStartClick} endIcon={<MicIcon />}>Activate</Button>
+                            <Button variant="contained" disabled={!playing} onClick={handleStopClick} endIcon={<MicOffIcon />}>Deactivate</Button>
+                            {/* <Button variant="contained" disabled={playing} onClick={handleResetClick}>Reset</Button> */}
                         </Box>
                         <Box align="center">
                             <FormControl component="fieldset" variant="standard" align='left'>
@@ -723,7 +730,23 @@ function WorkGPT() {
                                     </Select>
                                 </FormControl>}
                                 <FormControl variant="standard">
-                                    <InputLabel id="template-select-label" variant="standard">Current Context</InputLabel>
+                                    <Stack direction="row" spacing={1}>
+                                        
+                                        {
+                                            Object.keys(workTemplates).map(((workTemplateKey) => {
+                                                return (
+                                                    <Chip
+                                                        key={workTemplateKey}
+                                                        label={workTemplateKey}
+                                                        color={workTemplateKey === selectedTemplate ? 'primary' : 'default'}
+                                                        deleteIcon={workTemplateKey === selectedTemplate ? <DoneIcon /> : null}
+                                                    />
+                                                )
+                                            }))
+                                        }
+                                    </Stack>
+
+                                    {/* <InputLabel id="template-select-label" variant="standard">Current Context</InputLabel>
                                     <Select
                                         labelId="template-select-label"
                                         id="template-select"
@@ -738,7 +761,7 @@ function WorkGPT() {
                                                 )
                                             }))
                                         }
-                                    </Select>
+                                    </Select> */}
                                 </FormControl>
                             </FormControl>
                         </Box>
@@ -746,10 +769,10 @@ function WorkGPT() {
                     <Grid item xs={12} sm={4}></Grid>
                     <Grid item xs={12} sm={12}>
                         {
-                            selectedTemplate === 'Analytics Workflow' && chartData && chartData.data && <BarChart chartData={chartData} />
+                            selectedTemplate === SALES_FLOW && chartData && chartData.data && <BarChart chartData={chartData} />
                         }
                         {
-                            selectedTemplate === 'Workout Workflow' && (
+                            selectedTemplate === SERVICES_FLOW && (
                                 <>
                                     {/* <Stepper activeStep={0} alternativeLabel>
                                         <Step>
@@ -762,7 +785,7 @@ function WorkGPT() {
                                             <StepLabel>Push-Ups</StepLabel>
                                         </Step>
                                     </Stepper> */}
-                                    <Typography variant="caption"><pre>{workoutStatus}</pre></Typography>
+                                    <Typography variant="caption"><pre>{caseStatus}</pre></Typography>
                                 </>
                             )
                         }
@@ -788,7 +811,7 @@ function WorkGPT() {
                         />
                         <Button onClick={handleRestRequestClick}>Test request</Button>
                     </Grid>}
-                    { (debug || testManualInput) && <Grid item xs={12} sm={12}>
+                    <Grid item xs={12} sm={12}>
                         <TextField
                             id="soql-input"
                             label="SOQL Query"
@@ -799,8 +822,8 @@ function WorkGPT() {
                             value={soqlQuery}
                             onChange={handleQueryChange}
                         />
-                        <Button onClick={handleQueryClick}>Gen Report</Button>
-                    </Grid>}
+                        { (debug || testManualInput) && <Button onClick={handleQueryClick}>Gen Report</Button>}
+                    </Grid>
                     { debug && <Grid item xs={12} sm={12}>
                         <TextField
                             id="context-input"

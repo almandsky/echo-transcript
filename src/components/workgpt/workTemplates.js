@@ -1,35 +1,36 @@
 const currentDate = new Date();
+import { HOME_FLOW, SALES_FLOW, SERVICES_FLOW } from '../common/constants';
 
 const workTemplates = {
-    'Overall Workflow': {
+    [HOME_FLOW]: {
         workContext: `
 # Instruction
 
 This is the top level workflow, which we can see all the workflows that can perform below.
 
-If you cannot find any workflow match, come back to this 'Overall Workflow', and ask what to do next.
+If you cannot find any workflow match, come back to this 'Home', and ask what to do next.
 
 ## Available Workflows
 
 The list of available workflows are listed below.
 
-### Overall WorkFlow
+### Home
 
-'Overall Workflow' is the entry point.  If you cannot find any matching workflow, come back to this 'Overall Workflow'.
+'Home' is the entry point.  If you cannot find any matching workflow, come back to this 'Home'.
 
-### Analytics Workflow
+### Sales
 
-'Analytics Workflow' is the workflow to define the the report parameters.  If Human want to know more about the Revenue and business related info, go to this 'Analytics Workflow'.
+'Sales' is the workflow to define the the report parameters.  If Human want to know more about the Revenue and business related info, go to this 'Sales'.
 
-### Workout Workflow
+### Services
 
-'Workout Workflow' is to help to keep the 'Human' healthy.  It will guide the 'Human' on what he shall do to improve his health status by doing the workouts defined in the 'Workout Workflow'.
+'Services' is to help to keep track of the service cases status.  It will guide the 'Human' on what he shall do to follow up with the not yet closed status in 'Services'.
 
 
         `,
         actions: []
     },
-    'Analytics Workflow': {
+    [SALES_FLOW]: {
         workContext: `
 Current system date is ${currentDate.toISOString()}.
 
@@ -81,49 +82,45 @@ if you cannot find any match, clarify with the user.
 
 `,
         actions: [(answerText, callback) => {
-            console.log('sky debug 4001 answerText is ', answerText);
-
             const formattedText = answerText;
             if (callback) {
                 callback(formattedText)
             }
         }]
     },
-    'Workout Workflow': {
+    [SERVICES_FLOW]: {
         workContext: `
 
-There are 3 kinds of workout user can perform.  There are dependencies between the workouts.
+There are service cases that exists in the system.
 
-The workout have 3 status, 'Not Started', 'In Progress', and 'Completed'.  Default status is 'Not Started'
+Each case has a Owner value.  It can be assigned to a case owner.
 
-User cannot start the next workout until the dependent workout is completed.  If there is no dependency, user can start that work out any time.
+The case have 4 status value, 'New', 'Escalated', 'On Hold' 'Closed'.  Default status is 'New'.
+The case have 2 priority value, 'Low' and 'High'.  Default status is 'Low'.
+Besides the above two fields, The Case have Case Number, Subject, CreatedDate and Owner field.
 
-# Running
+Current user: Sky
 
-Run for 1 hour.
+Here are the list of cases:
 
-Dependent on: N/A
-
-# Pushups
-
-Do 100 push ups.
-
-Dependent on: Swimming
-
-# Swimming
-
-Swim for 30 mins.
-
-Dependent on: Running
+CaseNumber,Subject,Status,Priority,CreatedDate,Owner
+1000,Sample Case: Our Widgets have not been delivered.,Escalated,High,"10/15/2022, 9:57 AM",Sky
+1001,Sample Case 2: The widgets we received are the wrong size.,New,High,"10/15/2022, 9:57 AM",Amy
+1002,Sample Case 3: Cannot track our order.,On Hold,Low,"10/15/2022, 9:57 AM",Tony
+1007,Sample Case 4: Cannot open my order,Closed,High,"10/15/2022, 11:34 AM",Sky
+1008,Sample Case 3: Order not found,New,High,"10/15/2022, 11:34 AM",Sky
 
 
-Please note that default status is 'Not Started'
+Actions user can perform:
 
+For the case status that is NOT 'Closed', user can add reminder to keep track of outstanding actions that is corresponding to the case.  
+
+Once all the actions are completed, user can close the case.
+
+User need to follow up and take actions for the case status that is not 'Closed' if the user is the Owner.
 
         `,
         actions: [(answerText, callback) => {
-            console.log('sky debug 4001 answerText is ', answerText);
-
             const formattedText = answerText;
             if (callback) {
                 callback(formattedText)

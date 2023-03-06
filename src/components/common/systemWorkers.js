@@ -84,16 +84,18 @@ export const progressTracker = async ({ model, currentWorkContext, newPrompt, ca
 
 ------------------------------------------
 
-Based on the above context and chat history, what is the current step of the user is completed?
+Based on the above context and chat history, what is the current status of the cases?
 
-Please list all the steps status for me.  
+Please list all the case status group by Owner and Case Status.  
 
 Reply in this format:
 
 \`
-currentStep=<step name>
+Open case count for Sky=<How many cases that the status is not 'Closed'>
+CLosed case count for Sky=<How many cases that the status is 'Closed'>
 
-<step name>=<step status> \t<Step Description>
+Owner         \tStatus         \tCount
+<Case Owner>  \t<Case status>  \t<Count>
 \`
 
 
