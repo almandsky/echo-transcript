@@ -205,7 +205,7 @@ function WorkGPT() {
         let textToDisplay = '';
 
         if (newTemplate === 'Analytics Workflow') {
-            const { rawParams, reportIntend } = extractParameters(answerText);
+            const { rawParams } = extractParameters(answerText);
 
             if (rawParams) {
                 const soqlQueryOutput = paramsToSoql(rawParams);
@@ -213,14 +213,15 @@ function WorkGPT() {
                 if (soqlQueryOutput) {
                     try {
                         const { queryText, metric } = soqlQueryOutput
-                        const chartGenerated = await genChart(queryText, metric);
+                        const chartGeneratedData = await genChart(queryText, metric);
     
                         setSoqlQuery(queryText);
 
-                        if (chartGenerated) {
+                        if (chartGeneratedData) {
                             const reportIntentText = await reportIntendSummary({
                                 model,
                                 currentWorkContext: newWorkContext,
+                                reportData: chartGeneratedData,
                                 newPrompt,
                                 temperature
                             });
@@ -642,10 +643,10 @@ function WorkGPT() {
 
         if (data) {
             setChartData(data);
-            return true;
+            return data;
         }
 
-        return false;
+        return null;
     }
 
     const handleQueryClick = async () => {

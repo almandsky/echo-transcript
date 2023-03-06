@@ -111,20 +111,31 @@ currentStep=<step name>
     return response;
 }
 
-export const reportIntendSummary = async ({ model, currentWorkContext, newPrompt, callback }) => {
-    const additionalPrompt = `
+export const reportIntendSummary = async ({ model, currentWorkContext, newPrompt, reportData, callback }) => {
 
+    const additionalPrompt = `
 
 ------------------------------------------
 
 Based on the above context and chat history, what is the purpose of reports that user want?
 
-Please help to provide a short summary title for the report.
+-------------------------------
+    
+Here is the report data:
+                            
+${JSON.stringify(reportData, null, 4)}
+
+-------------------------------
+
+Please help to provide a short summary title for the report.  and give a summary of the data.
 
 Reply in this format:
 
 \`
 <Report Title>
+
+
+<Report Summary of the data>
 \`
 
     `;
