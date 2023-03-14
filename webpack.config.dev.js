@@ -2,6 +2,7 @@ const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const DotenvWebpackPlugin = require('dotenv-webpack');
 
 process.env.NODE_ENV = "development";
 
@@ -22,7 +23,11 @@ module.exports = {
     historyApiFallback: true,
     disableHostCheck: true,
     headers: { "Access-Control-Allow-Origin": "*" },
-    https: false
+    https: false,
+    proxy: {
+      '/completions': 'http://localhost:3001',
+      '/query': 'http://localhost:3001'
+  }
   },
   plugins: [
     new HtmlWebpackPlugin({

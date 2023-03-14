@@ -29,12 +29,6 @@ const Header = () => {
         setAnchorEl(null);
     };
 
-    // const routes = {
-    //     '/': "Echo Transcript",
-    //     '/talkgpt': "Talk to GPT",
-    //     '/about': "About"
-    // }
-
     return (
         <AppBar position="static">
             <Toolbar>

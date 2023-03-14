@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Prompt } from 'react-router-dom';
-import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -21,9 +20,11 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
+import { generateChat } from '../common/systemWorkers';
 
 const HUMAN_PREFIX = 'Human:';
-const AI_PREFIX = 'AI:';
+
+const MAX_HISTORY = 10;
 
 function TalkGPT() {
 
@@ -39,8 +40,6 @@ function TalkGPT() {
         autoGainControl,
     } = state;
 
-
-
     const [playing, setPlaying] = useState(false);
     const [localStream, setStream] = useState(null);
     const [speechRecognition, setRecognition] = useState(null);
@@ -51,16 +50,7 @@ function TalkGPT() {
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [model, setModel] = useState('text-davinci-003');
 
-    const [chatHistory, setChatHistory] = useState([
-        // '\nHuman:\n\nhow are you?',
-        // '\nAI:\n\nI am fine. How can I help you today?',
-        // 'AI: I am an AI created by OpenAI. How can I help you today?',
-        // 'Human: what do you like?',
-        // 'AI: I love exploring new ideas and helping people improve their lives. I especially like to focus on making technology that is easy to use and helpful for everyone.',
-        // 'Human: do you know what I like?',
-        // 'AI: I don\'t know exactly what you like, but I can make some suggestions based on what I know about you. What are some activities or topics that you usually enjoy?',
-        // 'Human: any things you can suggests to a 45 years old man?'
-    ]);
+    const [chatHistory, setChatHistory] = useState([]);
 
     const textFieldRef = useRef(null);
 
@@ -78,9 +68,9 @@ function TalkGPT() {
         let posComma = inputText.indexOf(':');
         let posCommaNonASCII = inputText.indexOf('：');
 
-        if (posComma >=0 && posComma < 10) {
+        if (posComma >=0 && posComma <= 10) {
             truncatedText = inputText.slice(posComma + 1);
-        } else if (posCommaNonASCII >=0 && posCommaNonASCII < 10) {
+        } else if (posCommaNonASCII >=0 && posCommaNonASCII <= 10) {
             truncatedText = inputText.slice(posCommaNonASCII + 1);
         } else {
             truncatedText = inputText;
@@ -103,31 +93,31 @@ function TalkGPT() {
 
         newPromptArray.push(HUMAN_PREFIX + textToRead);
 
-        const newPrompt = newPromptArray.length > 5
-            ? newPromptArray.slice(-5).join('\n')
+        const newPrompt = newPromptArray.length > MAX_HISTORY
+            ? newPromptArray.slice(-MAX_HISTORY).join('\n')
             : newPromptArray.join('\n');
 
-        setAnswering(true);
-        const token = process.env.OPENAI_API_KEY;
-        const response = await axios.post('https://api.openai.com/v1/completions', {
-            "model": model,
-            "prompt": newPrompt,
-            "temperature": 0.7,
-            "max_tokens": 255,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 0,
-            "stop": [`${HUMAN_PREFIX}`, `${AI_PREFIX}`]
-        }, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
+        window?.gtag('event', 'call_openai_start', {
+            'event_category': language,
+            'event_label': 'Making API call to openAI',
+            'value': newPrompt.length
         });
 
+        setAnswering(true);
 
-        const answerText = response.data.choices[0].text;
+        const answerText = await generateChat({
+            model,
+            newPrompt,
+            temperature: 0.5
+        });
 
         newPromptArray.push(answerText);
+
+        window?.gtag('event', 'call_openai_completed', {
+            'event_category': language,
+            'event_label': 'Received API response from openAI',
+            'value': answerText.length
+        });
         
         const textToDisplay = truncateText(answerText);
 
@@ -196,9 +186,8 @@ function TalkGPT() {
 
     const startProcess = async () => {
         window?.gtag('event', 'starttalk', {
-            'event_category': 'talkgpt',
-            'event_label': 'Start Talk to chatGPT',
-            language
+            'event_category': language,
+            'event_label': 'Start Talk to chatGPT'
         });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
@@ -346,9 +335,8 @@ function TalkGPT() {
 
     const stopProcess = () => {
         window?.gtag('event', 'stoptalk', {
-            'event_category': 'talkgpt',
-            'event_label': 'Stop Talk to chatGPT',
-            language
+            'event_category': language,
+            'event_label': 'Stop Talk to chatGPT'
         });
         if (speechRecognition) {
             speechRecognition.stop();
@@ -504,7 +492,7 @@ function TalkGPT() {
                                         disabled={playing}
                                     />
                                 </FormGroup>
-                                <FormControl variant="standard" sx={{ mb: 1 }}>
+                                <FormControl variant="standard">
                                     <InputLabel id="model-select-label" variant="standard">Model</InputLabel>
                                     <Select
                                         labelId="model-select-label"

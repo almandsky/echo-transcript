@@ -24,6 +24,10 @@ nav {
   word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 
+#transcript-div.work, #answer-div.work {
+  height: 100px;
+}
+
 /* Typing animation */
 .typing::after {
   content: ".";
