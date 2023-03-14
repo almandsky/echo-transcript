@@ -61,7 +61,7 @@ function App() {
       <Header />
       <Switch>
         <Route exact path="/" component={EchoTranscript} />
-        <Route exact path="/talkgpt" component={TalkGPT} />
+        {/* <Route exact path="/talkgpt" component={TalkGPT} /> */}
         <Route exact path="/workgpt" component={WorkGPT} />
         <Route path="/about" component={AboutPage} />
         <Route component={PageNotFound} />
