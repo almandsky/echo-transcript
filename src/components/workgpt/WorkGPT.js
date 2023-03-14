@@ -233,8 +233,6 @@ function WorkGPT() {
                                 temperature
                             });
 
-                            console.log('sky debug 5001 reportIntentText is ', reportIntentText);
-
                             const reportTitle = reportIntentText;
                             textToDisplay = reportTitle
                                 ? `${reportTitle}`
