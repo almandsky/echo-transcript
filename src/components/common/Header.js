@@ -56,6 +56,12 @@ const Header = (props) => {
     useEffect(() => {
         if (isAuthenticated()) {
             loadUserProfile();
+        } else {
+            setTimeout(()=> {
+                if (isAuthenticated()) {
+                    loadUserProfile();
+                }
+            }, 1000);
         }
     }, []);
 
