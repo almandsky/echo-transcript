@@ -24,7 +24,7 @@ import routes from './routes';
 
 
 const Header = (props) => {
-    const { isAuthenticated, login, logout, userHasScopes, getProfile } = props.auth;
+    const { isAuthenticated, login, logout, userHasScopes, getProfile } = props.auth || {};
 
     const location = useLocation();
     const activeStyle = { color: "#1976D2" };
@@ -54,7 +54,7 @@ const Header = (props) => {
     };
 
     useEffect(() => {
-        if (isAuthenticated()) {
+        if (isAuthenticated && isAuthenticated()) {
             loadUserProfile();
         } else {
             setTimeout(()=> {
@@ -109,7 +109,7 @@ const Header = (props) => {
                     {routes[location.pathname]}
                 </Typography>
                 {
-                    isAuthenticated() ? (
+                    isAuthenticated && isAuthenticated() ? (
                         <Box sx={{ flexGrow: 0 }}>
                             <Tooltip title="User Profile">
                                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>

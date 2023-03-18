@@ -76,7 +76,7 @@ function App(props) {
   }, []);
 
   return (
-    !tokenRenewalComplete ? "Loading" :
+    
       <AuthContext.Provider value={auth}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
