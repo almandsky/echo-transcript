@@ -1,5 +1,6 @@
 import React from "react";
 import AppBar from "@mui/material/AppBar";
+import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -15,7 +16,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import routes from './routes';
 
 
-const Header = () => {
+const Header = (props) => {
     const location = useLocation();
     const activeStyle = { color: "#1976D2" };
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -28,6 +29,8 @@ const Header = () => {
         setOpen(false);
         setAnchorEl(null);
     };
+
+    const { isAuthenticated, login, logout, userHasScopes } = props.auth;
 
     return (
         <AppBar position="static">
@@ -71,6 +74,14 @@ const Header = () => {
                 <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
                     {routes[location.pathname]}
                 </Typography>
+                {
+                    isAuthenticated() ? (
+                        <Button color="inherit" onClick={logout}>Logout</Button>
+                    ) : (
+                        <Button color="inherit" onClick={login}>Login</Button>
+                    )
+                }
+                
             </Toolbar>
         </AppBar>
     );

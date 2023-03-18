@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Prompt } from 'react-router-dom';
+import PropTypes from "prop-types";
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -16,9 +17,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
@@ -42,11 +40,11 @@ const HUMAN_PREFIX = 'Human:';
 
 const MAX_HISTORY = 1000;
 
-function WorkGPT() {
+function WorkGPT(props) {
 
     // block | none
     const debug = false;
-    const testManualInput = false;
+    const testManualInput = true;
 
     const [state, setState] = useState({
         language: 'en-US',
@@ -141,6 +139,7 @@ function WorkGPT() {
 
         const overallWorkContext = workTemplates[HOME_FLOW].workContext;
         const intentText = await intentDetection({
+            auth: props.auth,
             model,
             currentWorkContext: overallWorkContext,
             newPrompt: newChatHistory?.join('\n') + HUMAN_PREFIX + textToRead
@@ -190,6 +189,7 @@ function WorkGPT() {
             : 0.1
 
         const answerText = await generateChat({
+            auth: props.auth,
             model,
             currentWorkContext: newWorkContext,
             newPrompt,
@@ -226,6 +226,7 @@ function WorkGPT() {
 
                         if (chartGeneratedData) {
                             const reportIntentText = await reportIntendSummary({
+                                auth: props.auth,
                                 model,
                                 currentWorkContext: newWorkContext,
                                 reportData: chartGeneratedData,
@@ -257,6 +258,7 @@ function WorkGPT() {
             // update the new case status
             
             const caseStatusResponse = await progressTracker({
+                auth: props.auth,
                 model,
                 currentWorkContext: newWorkContext,
                 newPrompt: newPromptArray?.join('\n') + HUMAN_PREFIX + textToRead
@@ -577,14 +579,14 @@ function WorkGPT() {
         }
     };
 
-    const handleResetClick = () => {
-        const transcriptDiv = document.querySelector('#transcript-div');
-        const answerDiv = document.querySelector('#answer-div');
-        transcriptDiv.innerHTML = '';
-        answerDiv.innerHTML = '';
-        setChatHistory([]);
-        updateTemplateRelatedInfo(selectedTemplate);
-    };
+    // const handleResetClick = () => {
+    //     const transcriptDiv = document.querySelector('#transcript-div');
+    //     const answerDiv = document.querySelector('#answer-div');
+    //     transcriptDiv.innerHTML = '';
+    //     answerDiv.innerHTML = '';
+    //     setChatHistory([]);
+    //     updateTemplateRelatedInfo(selectedTemplate);
+    // };
 
     const handleLanguageChange = (event, newValue) => {
         setState({
@@ -607,12 +609,12 @@ function WorkGPT() {
         setCurrentWorkContext(workContext);
     }
 
-    const handleTemplateChange = (event, newValue) => {
-        setSelectedTemplate(newValue.props.value);
+    // const handleTemplateChange = (event, newValue) => {
+    //     setSelectedTemplate(newValue.props.value);
 
-        // update the actions list and context as well.
-        updateTemplateRelatedInfo(newValue.props.value);
-    };
+    //     // update the actions list and context as well.
+    //     updateTemplateRelatedInfo(newValue.props.value);
+    // };
 
     const handleWorkContextChange = (event) => {
         setCurrentWorkContext(event.target.value);
@@ -863,5 +865,9 @@ function WorkGPT() {
         </Container>
     );
 }
+
+WorkGPT.propTypes = {
+    auth: PropTypes.object.isRequired
+};
 
 export default WorkGPT;

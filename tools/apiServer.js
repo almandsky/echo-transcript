@@ -1,20 +1,38 @@
 const express = require('express');
-const cors = require('cors');
 const axios = require('axios');
+const { expressjwt: jwt } = require("express-jwt"); // Validate JWT and set req.user
+const jwksRsa = require("jwks-rsa"); // Retrieve RSA keys from a JSON Web Key set (JWKS) endpoint
+const checkScope = require("express-jwt-authz"); // Validate JWT scopes
 
 const { getSalesforceAuthToken, queryData } = require('../src/server/utils/SalesforceClient');
 
 require("dotenv").config();
+
+const checkJwt = jwt({
+    // Dynamically provide a signing key based on the kid in the header
+    // and the signing keys provided by the JWKS endpoint.
+    secret: jwksRsa.expressJwtSecret({
+      cache: true, // cache the signing key
+      rateLimit: true,
+      jwksRequestsPerMinute: 5, // prevent attackers from requesting more than 5 per minute
+      jwksUri: `https://${
+        process.env.AUTH0_DOMAIN
+      }/.well-known/jwks.json`
+    }),
+  
+    // Validate the audience and the issuer.
+    audience: process.env.AUTH0_AUDIENCE,
+    issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+  
+    // This must match the algorithm selected in the Auth0 dashboard under your app's advanced settings under the OAuth tab
+    algorithms: ["RS256"]
+  });
 
 const {
     OPENAI_API_KEY
 } = process.env;
 
 const app = express();
-
-app.use(cors({
-    origin: 'http://localhost:8080'
-}));
 
 app.use(express.json())
 
@@ -25,7 +43,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/completions", async (req, res) => {
+app.post("/completions", checkJwt, checkScope(["read:completions"], { customScopeKey: 'permissions', customUserKey: 'auth' }), async (req, res) => {
     try {
         const response = await axios.post('https://api.openai.com/v1/completions', req.body, {
             headers: {
