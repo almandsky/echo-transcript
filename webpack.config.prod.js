@@ -4,9 +4,19 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 const { GenerateSW } = require('workbox-webpack-plugin');
-const DotenvWebpackPlugin = require('dotenv-webpack');
+// const DotenvWebpackPlugin = require('dotenv-webpack');
+const dotenv = require('dotenv');
 
 process.env.NODE_ENV = "production";
+
+const env = dotenv.config().parsed;
+
+const envKeys = Object.keys(env).reduce((prev, next) => {
+  prev[`process.env.${next}`] = JSON.stringify(env[next]);
+  return prev;
+}, {});
+
+envKeys['process.env.NODE_ENV'] = JSON.stringify(process.env.NODE_ENV);
 
 module.exports = {
   mode: "production",
@@ -25,11 +35,7 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: "[name].[contenthash].css"
     }),
-    new webpack.DefinePlugin({
-      // This global makes sure React is built in prod mode.
-      "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
-      // "process.env.OPENAI_API_KEY": JSON.stringify(process.env.OPENAI_API_KEY)
-    }),
+    new webpack.DefinePlugin(envKeys),
     new HtmlWebpackPlugin({
       template: "src/index.html",
       favicon: "src/favicon.ico",
@@ -111,8 +117,7 @@ module.exports = {
           },
         },
       ],
-    }),
-    new DotenvWebpackPlugin()
+    })
   ],
   module: {
     rules: [

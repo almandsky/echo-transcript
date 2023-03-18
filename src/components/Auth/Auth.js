@@ -1,5 +1,5 @@
 import { WebAuth } from "auth0-js";
-
+require("dotenv").config();
 const REDIRECT_ON_LOGIN = "redirect_on_login";
 
 // Stored outside class since private
