@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -11,11 +11,31 @@ import WorkGPT from './workgpt/WorkGPT';
 import AboutPage from './about/About';
 import PageNotFound from './PageNotFound';
 
+import Auth from "./Auth/Auth";
+import Callback from "./Auth/Callback";
+import AuthContext from "./AuthContext";
+import PrivateRoute from "./PrivateRoute";
+
 const theme = createTheme();
 
-function App() {
+function App(props) {
+
+  const [auth, setAuth] = useState(null);
+  const [tokenRenewalComplete, setTokenRenewalComplete] = useState(false);
+
+
   // componentDidMount
   useEffect(() => {
+
+    const authInstance = new Auth(props.history);
+
+    authInstance.renewToken(() => {
+      setTokenRenewalComplete(true)
+    });
+
+
+    setAuth(authInstance);
+
     // Service Worker
     if (process.env.NODE_ENV === 'production') {
       navigator.serviceWorker.register('/sw.js')
@@ -56,17 +76,25 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Header />
-      <Switch>
-        <Route exact path="/" component={EchoTranscript} />
-        <Route exact path="/talkgpt" component={TalkGPT} />
-        <Route exact path="/workgpt" component={WorkGPT} />
-        <Route path="/about" component={AboutPage} />
-        <Route component={PageNotFound} />
-      </Switch>
-    </ThemeProvider>
+    !tokenRenewalComplete ? "Loading" :
+      <AuthContext.Provider value={auth}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Header auth={auth} />
+          <Switch>
+            <Route exact path="/" component={EchoTranscript} />
+            <Route
+              path="/callback"
+              render={props => <Callback auth={auth} {...props} />}
+            />
+            {/* <Route exact path="/talkgpt" component={TalkGPT} /> */}
+            <PrivateRoute path="/talkgpt" component={TalkGPT} scopes={["read:completions"]} />
+            <PrivateRoute path="/workgpt" component={WorkGPT} scopes={["read:completions", "read:workgpt"]} />
+            <Route path="/about" component={AboutPage} />
+            <Route component={PageNotFound} />
+          </Switch>
+        </ThemeProvider>
+      </AuthContext.Provider>
   );
 }
 

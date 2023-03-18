@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Prompt } from 'react-router-dom';
+import PropTypes from "prop-types";
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -26,7 +27,7 @@ const HUMAN_PREFIX = 'Human:';
 
 const MAX_HISTORY = 10;
 
-function TalkGPT() {
+function TalkGPT(props) {
 
     const [state, setState] = useState({
         language: 'en-US',
@@ -106,6 +107,7 @@ function TalkGPT() {
         setAnswering(true);
 
         const answerText = await generateChat({
+            auth: props.auth,
             model,
             newPrompt,
             temperature: 0.5
@@ -548,5 +550,9 @@ function TalkGPT() {
         </Container>
     );
 }
+
+TalkGPT.propTypes = {
+    auth: PropTypes.object.isRequired
+  };
 
 export default TalkGPT;

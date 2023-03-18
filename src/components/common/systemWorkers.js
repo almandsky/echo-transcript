@@ -9,6 +9,7 @@ const AI_ENDPOINT = '/completions';
 
 
 export const generateChat = async ({
+    auth,
     model,
     currentWorkContext = '',
     newPrompt,
@@ -31,6 +32,10 @@ export const generateChat = async ({
         frequency_penalty: 0.2,
         presence_penalty: 0.2,
         stop: [`${HUMAN_PREFIX}`, `${AI_PREFIX}`]
+    }, {
+        headers: {
+          'Authorization': `Bearer ${auth.getAccessToken()}` 
+        }
     });
 
     const answerText = response.data;
@@ -47,7 +52,7 @@ export const generateChat = async ({
 }
 
 
-export const intentDetection = async ({ model, currentWorkContext, newPrompt, callback }) => {
+export const intentDetection = async ({ auth, model, currentWorkContext, newPrompt, callback }) => {
     const additionalPrompt = `
 
 
@@ -67,6 +72,7 @@ Reply in this format:
     `;
 
     const response = await generateChat({
+        auth,
         model,
         currentWorkContext,
         newPrompt,
@@ -78,7 +84,7 @@ Reply in this format:
     return response;
 }
 
-export const progressTracker = async ({ model, currentWorkContext, newPrompt, callback }) => {
+export const progressTracker = async ({ auth, model, currentWorkContext, newPrompt, callback }) => {
     const additionalPrompt = `
 
 
@@ -102,6 +108,7 @@ Owner         \tStatus         \tCount
     `;
 
     const response = await generateChat({
+        auth,
         model,
         currentWorkContext,
         newPrompt,
@@ -113,7 +120,7 @@ Owner         \tStatus         \tCount
     return response;
 }
 
-export const reportIntendSummary = async ({ model, currentWorkContext, newPrompt, reportData, callback }) => {
+export const reportIntendSummary = async ({ auth, model, currentWorkContext, newPrompt, reportData, callback }) => {
 
     const additionalPrompt = `
 
@@ -147,6 +154,7 @@ Reply in this format:
     `;
 
     const response = await generateChat({
+        auth,
         model,
         currentWorkContext,
         newPrompt,

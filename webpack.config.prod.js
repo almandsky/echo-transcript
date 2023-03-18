@@ -28,7 +28,7 @@ module.exports = {
     new webpack.DefinePlugin({
       // This global makes sure React is built in prod mode.
       "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
-      "process.env.OPENAI_API_KEY": JSON.stringify(process.env.OPENAI_API_KEY)
+      // "process.env.OPENAI_API_KEY": JSON.stringify(process.env.OPENAI_API_KEY)
     }),
     new HtmlWebpackPlugin({
       template: "src/index.html",
@@ -112,6 +112,7 @@ module.exports = {
         },
       ],
     }),
+    new DotenvWebpackPlugin()
   ],
   module: {
     rules: [
