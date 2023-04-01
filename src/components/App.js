@@ -87,7 +87,9 @@ function App(props) {
             render={props => <Callback auth={auth} {...props} />}
           /> : <Route path="/callback" component={Loading} />}
 
-          {tokenRenewalComplete ? <PrivateRoute path="/talkgpt" component={TalkGPT} scopes={["read:completions"]} /> : <Route path="/talkgpt" component={Loading} />}
+          <Route exact path="/talkgpt" component={TalkGPT} />
+
+          {/* {tokenRenewalComplete ? <PrivateRoute path="/talkgpt" component={TalkGPT} scopes={["read:completions"]} /> : <Route path="/talkgpt" component={Loading} />} */}
           {tokenRenewalComplete ? <PrivateRoute path="/workgpt" component={WorkGPT} scopes={["read:completions", "read:workgpt"]} /> : <Route path="/workgpt" component={Loading} />}
           <Route path="/about" component={AboutPage} />
           <Route component={PageNotFound} />
