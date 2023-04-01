@@ -70,3 +70,15 @@ nav {
       transform: rotate(360deg);
   }
 }
+
+/* Chat Message */
+
+.outbound {
+  border-radius: 0.5rem 0.5rem 0;
+  background-color: #1976D2;
+}
+
+.inbound {
+  border-radius: 0.5rem 0.5rem 0.5rem 0;
+  background-color: #f3f3f3;
+}

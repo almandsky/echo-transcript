@@ -23,7 +23,12 @@ import Typography from "@mui/material/Typography";
 import LanguageSelect from '../common/LanguageSelect';
 import { generateChat } from '../common/systemWorkers';
 
+import ChatHistory from "../ChatHistory/ChatHistory";
+
 const HUMAN_PREFIX = 'Human:';
+
+const INBOUND = 'INBOUND';
+const OUTBOUND = 'OUTBOUND';
 
 const MAX_HISTORY = 10;
 
@@ -54,6 +59,29 @@ function TalkGPT(props) {
     const [chatHistory, setChatHistory] = useState([]);
 
     const textFieldRef = useRef(null);
+
+    const history = [
+        {
+            id: 0,
+            message: 'How are you',
+            type: OUTBOUND
+        },
+        {
+            id: 1,
+            message: 'I am fine, how about you?',
+            type: INBOUND
+        },
+        {
+            id: 2,
+            message: 'I am doing well.  What\'s next?',
+            type: OUTBOUND
+        },
+        {
+            id: 3,
+            message: 'What can I help you?',
+            type: INBOUND
+        },
+    ]
 
     useEffect(() => {
         textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
@@ -535,6 +563,7 @@ function TalkGPT(props) {
                         <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
                     </Grid>
                 </Grid>
+                <ChatHistory history={history} />
                 <Prompt
                         when={playing}
                         // message="Are you sure you want to leave this page? Your microphone is still being used."
@@ -553,6 +582,6 @@ function TalkGPT(props) {
 
 TalkGPT.propTypes = {
     auth: PropTypes.object.isRequired
-  };
+};
 
 export default TalkGPT;
