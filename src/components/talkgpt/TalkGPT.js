@@ -196,7 +196,7 @@ function TalkGPT(props) {
                         callback();
                     }
                 }
-            }, 30);
+            }, 50);
         } catch (err) {
             console.log(`typeMessage error detected: ${err}`);
         }
@@ -391,7 +391,6 @@ function TalkGPT(props) {
 
     const loadUserProfile = () => {
         props.auth.getProfile((profile, error) => {
-            console.log(profile);
             if (!error) {
                 setUserProfile(profile);
             } else {
