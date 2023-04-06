@@ -51,7 +51,7 @@ body {
 
 /* Typing animation */
 .typing::after {
-    content: ".";
+    content: "|";
     animation: typing 1s infinite;
 }
 

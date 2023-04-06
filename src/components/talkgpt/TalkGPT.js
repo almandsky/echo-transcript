@@ -166,9 +166,12 @@ function TalkGPT(props) {
         
         const textToDisplay = truncateText(answerText);
 
+        setAnswering(false);
         typeMessage(answerDiv, textToDisplay, () => {
             answerDiv.scrollTop = answerDiv.scrollHeight;
+            transcriptDiv.innerHTML = '';
             setChatHistory(newPromptArray);
+            
         });
 
         addChatHistory({
@@ -179,18 +182,18 @@ function TalkGPT(props) {
 
         speakMessage(textToDisplay, true);
 
-        setAnswering(false);
-        transcriptDiv.innerHTML = '';
     };
 
     function typeMessage(element, message, callback) {
         try {
             let i = 0;
+            element.classList.add('typing');
             let intervalId = setInterval(() => {
                 element.innerHTML += message.slice(i, i + 1);
                 element.scrollTop = element.scrollHeight;
                 i++;
                 if (i > message.length) {
+                    element.classList.remove('typing');
                     clearInterval(intervalId);
                     if (callback) {
                         callback();

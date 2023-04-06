@@ -300,6 +300,7 @@ function WorkGPT(props) {
             let i = 0;
             let intervalId = setInterval(() => {
                 element.innerHTML += message.slice(i, i + 1);
+                element.scrollTop = element.scrollHeight;
                 i++;
                 if (i > message.length) {
                     clearInterval(intervalId);
@@ -307,7 +308,7 @@ function WorkGPT(props) {
                         callback();
                     }
                 }
-            }, 30);
+            }, 50);
         } catch (err) {
             console.log(`typeMessage error detected: ${err}`);
         }
