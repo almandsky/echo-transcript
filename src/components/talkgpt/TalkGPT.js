@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Prompt } from 'react-router-dom';
 import PropTypes from "prop-types";
 
@@ -17,13 +17,17 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
 import { generateChat } from '../common/systemWorkers';
 
+import ChatHistory from "../ChatHistory/ChatHistory";
+
 const HUMAN_PREFIX = 'Human:';
+
+const INBOUND = 'INBOUND';
+const OUTBOUND = 'OUTBOUND';
 
 const MAX_HISTORY = 10;
 
@@ -52,13 +56,8 @@ function TalkGPT(props) {
     const [model, setModel] = useState('text-davinci-003');
 
     const [chatHistory, setChatHistory] = useState([]);
-
-    const textFieldRef = useRef(null);
-
-    useEffect(() => {
-        textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
-    }, [textFieldRef.current?.value]);
-
+    const [displayChatHistory, setDisplayChatHistory] = useState([]);
+    const [userProfile, setUserProfile] = useState([]);
 
     const truncateText = (inputText) => {
         if (!inputText) {
@@ -77,11 +76,55 @@ function TalkGPT(props) {
             truncatedText = inputText;
         }
 
-        return truncatedText;
+        return truncatedText.trim();
+    }
+
+    const addChatHistory = ({ user, message, type}) => {
+        const currentTime = new Date();
+
+        const newMessage = {
+            id: currentTime,
+            user,
+            message,
+            type,
+            createdDate: currentTime.toLocaleTimeString()
+        }
+
+        const newChatHistory = displayChatHistory;
+        newChatHistory.push(newMessage);
+
+        setDisplayChatHistory(newChatHistory);
+    }
+
+    const speakMessage = (textToDisplay, pause = false) => {
+        const supportedVoices = window.speechSynthesis.getVoices();
+        const utterance = new SpeechSynthesisUtterance(textToDisplay);
+        if (language !== 'en-US') {
+            utterance.voice = supportedVoices.find((voice) => voice.lang === language);
+        }
+
+        utterance.lang = language;
+        utterance.rate = 0.9;
+
+        utterance.onstart = () => {
+            console.log('Speech started, pause is ', pause);
+            if (pause) {
+                speechRecognition.stop();
+            }
+
+        };
+
+        utterance.onend = () => {
+            console.log('Speech ended, pause is ', pause);
+            if (pause) {
+                speechRecognition.start();
+            }
+        };
+        synth.speak(utterance);
     }
 
     const processAnswer = async () => {
-        const supportedVoices = window.speechSynthesis.getVoices();
+        // const supportedVoices = window.speechSynthesis.getVoices();
         const transcriptDiv = document.querySelector('#transcript-div');
         const answerDiv = document.querySelector('#answer-div');
         const textToRead = transcriptDiv.innerHTML;
@@ -128,43 +171,16 @@ function TalkGPT(props) {
             setChatHistory(newPromptArray);
         });
 
-        const utterance = new SpeechSynthesisUtterance(textToDisplay);
-        if (language !== 'en-US') {
-            utterance.voice = supportedVoices.find((voice) => voice.lang === language);
-        }
-        
-        utterance.lang = language;
-        utterance.rate = 0.9;
+        addChatHistory({
+            user: 'chatGPT',
+            message: textToDisplay,
+            type: INBOUND
+        });
 
-        utterance.onstart = () => {
-            console.log('Speech started');
-            speechRecognition.stop();
-        };
-
-        utterance.onend = () => {
-            console.log('Speech ended');
-            speechRecognition.start();
-        };
-        synth.speak(utterance);
+        speakMessage(textToDisplay, true);
 
         setAnswering(false);
         transcriptDiv.innerHTML = '';
-    };
-
-    const testSpeech = (message) => {
-        const supportedVoices = window.speechSynthesis.getVoices();
-        const utterance = new SpeechSynthesisUtterance(message);
-        if (language !== 'en-US') {
-            utterance.voice = supportedVoices.find((voice) => voice.lang === language);
-        }
-        utterance.lang = language;
-        utterance.rate = 0.9;
-        synth.speak(utterance);
-    };
-
-    const handleOnclickTest = () => {
-        const answerDiv = document.querySelector('#answer-div');
-        testSpeech(answerDiv.innerHTML);
     };
 
     function typeMessage(element, message, callback) {
@@ -172,6 +188,7 @@ function TalkGPT(props) {
             let i = 0;
             let intervalId = setInterval(() => {
                 element.innerHTML += message.slice(i, i + 1);
+                element.scrollTop = element.scrollHeight;
                 i++;
                 if (i > message.length) {
                     clearInterval(intervalId);
@@ -252,6 +269,11 @@ function TalkGPT(props) {
                             ...chatHistory,
                             historyMessage
                         ])
+                        addChatHistory({
+                            user: userProfile.nickname,
+                            message,
+                            type: OUTBOUND
+                        })
                         typeMessage(transcriptDiv, message, async () => {
                             transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
                             answerDiv.innerHTML = '';
@@ -288,7 +310,8 @@ function TalkGPT(props) {
             speechRecognition.onend = (event) => {
                 console.log(`onend: ${JSON.stringify(event)}`);
                 if (playing && !synth.speaking) {
-                    setPlaying(false);
+                    speechRecognition.stop();
+                    speechRecognition.start();
                 }
             }
 
@@ -341,6 +364,7 @@ function TalkGPT(props) {
             'event_label': 'Stop Talk to chatGPT'
         });
         if (speechRecognition) {
+            speechRecognition.onend = null;
             speechRecognition.stop();
         }
 
@@ -365,6 +389,17 @@ function TalkGPT(props) {
         setThinking(false);
     };
 
+    const loadUserProfile = () => {
+        props.auth.getProfile((profile, error) => {
+            console.log(profile);
+            if (!error) {
+                setUserProfile(profile);
+            } else {
+                console.log(error);
+            }
+        });
+    }
+
     // componentDidMount
     useEffect(() => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -386,6 +421,8 @@ function TalkGPT(props) {
             console.log('Wake lock is not supported by this browser.')
         }
 
+        loadUserProfile();
+
         setRecognition(recognition);
         setSynth(synthesis);
         setWakeLockSupported(tempWakeLockSupported);
@@ -402,8 +439,8 @@ function TalkGPT(props) {
     useEffect(async () => {
         // based on is playing or not, either start the audio or stop.
         if (playing) {
+            speakMessage('Let\'s start talking!', true);
             await startProcess();
-            testSpeech('Let\'s start!');
         } else {
             stopProcess();
         }
@@ -418,6 +455,9 @@ function TalkGPT(props) {
 
     const handleStopClick = () => {
         setPlaying(false);
+        if (speechRecognition) {
+            speechRecognition.stop();
+        }
     };
 
     const handleResetClick = () => {
@@ -426,6 +466,7 @@ function TalkGPT(props) {
         transcriptDiv.innerHTML = '';
         answerDiv.innerHTML = '';
         setChatHistory([]);
+        setDisplayChatHistory([]);
     };
 
     const handleLanguageChange = (event, newValue) => {
@@ -515,26 +556,14 @@ function TalkGPT(props) {
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <Typography variant="caption">You said:</Typography>
-                        <Card raised sx={{ p: 2 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
+                        <Card raised sx={{ p: 1 }}><pre id="transcript-div" className={thinking ? 'thinking' : ''}></pre></Card>
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <Typography variant="caption">chatGPT said:</Typography>
-                        <Card raised sx={{ p: 2, bgcolor: '#defcfc' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
-                    </Grid>
-                    <Grid item xs={12} sm={12}>
-                        <TextField
-                            id="text-input"
-                            label="Chat History"
-                            variant="outlined"
-                            multiline
-                            sx={{ width: '100%' }}
-                            rows={4}
-                            value={chatHistory.join('\n')}
-                            inputRef={textFieldRef}
-                        />
-                        <Button onClick={handleOnclickTest}>Repeat the chatGPT answer</Button>
+                        <Card raised sx={{ p: 1, bgcolor: '#defcfc', marginBottom: '1rem' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                 </Grid>
+                <ChatHistory history={displayChatHistory} />
                 <Prompt
                         when={playing}
                         // message="Are you sure you want to leave this page? Your microphone is still being used."
@@ -553,6 +582,6 @@ function TalkGPT(props) {
 
 TalkGPT.propTypes = {
     auth: PropTypes.object.isRequired
-  };
+};
 
 export default TalkGPT;
