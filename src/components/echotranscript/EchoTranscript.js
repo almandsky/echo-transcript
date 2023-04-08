@@ -24,6 +24,7 @@ import VolumeUp from "@mui/icons-material/VolumeUp";
 import { grey } from '@mui/material/colors';
 
 import LanguageSelect from "../common/LanguageSelect";
+import { typeMessage } from '../common/utils';
 
 function EchoTranscript() {
     const [state, setState] = useState({
@@ -46,25 +47,6 @@ function EchoTranscript() {
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [volume, setVolume] = useState(1);
-
-    function typeMessage(element, message, callback) {
-        try {
-            let i = 0;
-            let intervalId = setInterval(() => {
-                element.innerHTML += message.slice(i, i + 1);
-                i++;
-                if (i > message.length) {
-                    clearInterval(intervalId);
-                    if (callback) {
-                        callback();
-                    }
-                }
-            }, 30);
-        } catch (err) {
-            console.log(`typeMessage error detected: ${err}`);
-        }
-
-    }
 
     const startProcess = async () => {
         window?.gtag('event', 'startecho', {
@@ -125,10 +107,10 @@ function EchoTranscript() {
                             message += '. ';
                         }
 
+                        setThinking(false);
                         typeMessage(transcriptDiv, message, () => {
                             transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
                         });
-                        setThinking(false);
                     } else {
                         setThinking(true);
                     }
