@@ -110,7 +110,7 @@ function EchoTranscript() {
                         setThinking(false);
                         typeMessage(transcriptDiv, message, () => {
                             transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
-                        });
+                        }, 10);
                     } else {
                         setThinking(true);
                     }

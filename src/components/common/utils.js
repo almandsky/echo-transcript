@@ -156,7 +156,7 @@ export const genChartData = async (soqlQuery, metric) => {
 }
 
 
-export const typeMessage = (element, message, callback) => {
+export const typeMessage = (element, message, callback, interval = 50) => {
     try {
         let i = 0;
         element.classList.add('typing');
@@ -171,7 +171,7 @@ export const typeMessage = (element, message, callback) => {
                     callback();
                 }
             }
-        }, 50);
+        }, interval);
     } catch (err) {
         console.log(`typeMessage error detected: ${err}`);
     }
