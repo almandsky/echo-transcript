@@ -31,7 +31,7 @@ import workTemplates from './workTemplates';
 import { generateChat, intentDetection, progressTracker, reportIntendSummary } from '../common/systemWorkers';
 import BarChart from '../charts/BarChart';
 
-import { genChartData } from '../common/utils';
+import { genChartData, typeMessage, truncateText } from '../common/utils';
 import { extractParameters, paramsToSoql } from '../common/messageToActions';
 
 import { HOME_FLOW, SALES_FLOW, SERVICES_FLOW } from '../common/constants';
@@ -44,7 +44,7 @@ function WorkGPT(props) {
 
     // block | none
     const debug = false;
-    const testManualInput = true;
+    const testManualInput = false;
 
     const [state, setState] = useState({
         language: 'en-US',
@@ -86,27 +86,6 @@ function WorkGPT(props) {
             textFieldRef.current.scrollTop = textFieldRef.current.scrollHeight;
         }
     }, [textFieldRef.current?.value]);
-
-
-    const truncateText = (inputText) => {
-        if (!inputText) {
-            return inputText;
-        }
-
-        let truncatedText = '';
-        let posComma = inputText.indexOf(':');
-        let posCommaNonASCII = inputText.indexOf('：');
-
-        if (posComma >= 0 && posComma <= 10) {
-            truncatedText = inputText.slice(posComma + 1);
-        } else if (posCommaNonASCII >= 0 && posCommaNonASCII <= 10) {
-            truncatedText = inputText.slice(posCommaNonASCII + 1);
-        } else {
-            truncatedText = inputText;
-        }
-
-        return truncatedText;
-    }
 
     const processAnswer = async () => {
         // const supportedVoices = window.speechSynthesis.getVoices();
@@ -275,7 +254,7 @@ function WorkGPT(props) {
         }
 
         // type and speak the response
-
+        setAnswering(false);
         typeMessage(answerDiv, textToDisplay, async () => {
             answerDiv.scrollTop = answerDiv.scrollHeight;
             setChatHistory(newPromptArray);
@@ -283,7 +262,7 @@ function WorkGPT(props) {
 
         speakMessage(textToDisplay, true);
 
-        setAnswering(false);
+        
         newChatHistoryMap[newTemplate] = newPromptArray;
         setChatHistoryMap(newChatHistoryMap);
         transcriptDiv.innerHTML = '';
@@ -294,25 +273,6 @@ function WorkGPT(props) {
         const answerDiv = document.querySelector('#answer-div');
         speakMessage(answerDiv.innerHTML, false);
     };
-
-    function typeMessage(element, message, callback) {
-        try {
-            let i = 0;
-            let intervalId = setInterval(() => {
-                element.innerHTML += message.slice(i, i + 1);
-                element.scrollTop = element.scrollHeight;
-                i++;
-                if (i > message.length) {
-                    clearInterval(intervalId);
-                    if (callback) {
-                        callback();
-                    }
-                }
-            }, 50);
-        } catch (err) {
-            console.log(`typeMessage error detected: ${err}`);
-        }
-    }
 
     const speakMessage = (textToDisplay, pause = false) => {
         const supportedVoices = window.speechSynthesis.getVoices();

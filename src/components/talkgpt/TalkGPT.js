@@ -24,6 +24,8 @@ import { generateChat } from '../common/systemWorkers';
 
 import ChatHistory from "../ChatHistory/ChatHistory";
 
+import { typeMessage, truncateText } from '../common/utils';
+
 const HUMAN_PREFIX = 'Human:';
 
 const INBOUND = 'INBOUND';
@@ -59,25 +61,6 @@ function TalkGPT(props) {
     const [displayChatHistory, setDisplayChatHistory] = useState([]);
     const [userProfile, setUserProfile] = useState([]);
 
-    const truncateText = (inputText) => {
-        if (!inputText) {
-            return inputText;
-        }
-
-        let truncatedText = '';
-        let posComma = inputText.indexOf(':');
-        let posCommaNonASCII = inputText.indexOf('：');
-
-        if (posComma >=0 && posComma <= 10) {
-            truncatedText = inputText.slice(posComma + 1);
-        } else if (posCommaNonASCII >=0 && posCommaNonASCII <= 10) {
-            truncatedText = inputText.slice(posCommaNonASCII + 1);
-        } else {
-            truncatedText = inputText;
-        }
-
-        return truncatedText.trim();
-    }
 
     const addChatHistory = ({ user, message, type}) => {
         const currentTime = new Date();
@@ -183,28 +166,6 @@ function TalkGPT(props) {
         speakMessage(textToDisplay, true);
 
     };
-
-    function typeMessage(element, message, callback) {
-        try {
-            let i = 0;
-            element.classList.add('typing');
-            let intervalId = setInterval(() => {
-                element.innerHTML += message.slice(i, i + 1);
-                element.scrollTop = element.scrollHeight;
-                i++;
-                if (i > message.length) {
-                    element.classList.remove('typing');
-                    clearInterval(intervalId);
-                    if (callback) {
-                        callback();
-                    }
-                }
-            }, 50);
-        } catch (err) {
-            console.log(`typeMessage error detected: ${err}`);
-        }
-
-    }
 
     const startProcess = async () => {
         window?.gtag('event', 'starttalk', {
@@ -441,7 +402,6 @@ function TalkGPT(props) {
     useEffect(async () => {
         // based on is playing or not, either start the audio or stop.
         if (playing) {
-            speakMessage('Let\'s start talking!', true);
             await startProcess();
         } else {
             stopProcess();

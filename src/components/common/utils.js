@@ -154,3 +154,45 @@ export const genChartData = async (soqlQuery, metric) => {
 
     return finalOutput;
 }
+
+
+export const typeMessage = (element, message, callback, interval = 50) => {
+    try {
+        let i = 0;
+        element.classList.add('typing');
+        let intervalId = setInterval(() => {
+            element.innerHTML += message.slice(i, i + 1);
+            element.scrollTop = element.scrollHeight;
+            i++;
+            if (i > message.length) {
+                element.classList.remove('typing');
+                clearInterval(intervalId);
+                if (callback) {
+                    callback();
+                }
+            }
+        }, interval);
+    } catch (err) {
+        console.log(`typeMessage error detected: ${err}`);
+    }
+};
+
+export const truncateText = (inputText) => {
+    if (!inputText) {
+        return inputText;
+    }
+
+    let truncatedText = '';
+    let posComma = inputText.indexOf(':');
+    let posCommaNonASCII = inputText.indexOf('：');
+
+    if (posComma >=0 && posComma <= 10) {
+        truncatedText = inputText.slice(posComma + 1);
+    } else if (posCommaNonASCII >=0 && posCommaNonASCII <= 10) {
+        truncatedText = inputText.slice(posCommaNonASCII + 1);
+    } else {
+        truncatedText = inputText;
+    }
+
+    return truncatedText.trim();
+};
