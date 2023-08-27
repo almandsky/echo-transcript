@@ -9,6 +9,30 @@ const checkScope = require("express-jwt-authz"); // Validate JWT scopes
 
 const { getSalesforceAuthToken, queryData } = require('./src/server/utils/SalesforceClient');
 
+class MyClassificationPipeline {
+  static task = 'feature-extraction';
+  static model = 'Xenova/all-MiniLM-L6-v2';
+  static instance = null;
+
+  static async getInstance(progress_callback = null) {
+    if (this.instance === null) {
+      // Dynamically import the Transformers.js library
+      let { pipeline, env } = await import('@xenova/transformers');
+
+      // NOTE: Uncomment this to change the cache directory
+      // env.cacheDir = './.cache';
+
+      this.instance = pipeline(this.task, this.model, { progress_callback });
+    }
+
+    return this.instance;
+  }
+}
+
+// Comment out this line if you don't want to start loading the model as soon as the server starts.
+// If commented out, the model will be loaded when the first request is received (i.e,. lazily).
+MyClassificationPipeline.getInstance();
+
 require("dotenv").config();
 
 const checkJwt = jwt({
@@ -85,6 +109,34 @@ app.post("/query", async (req, res) => {
     
       const msResponseTime = Date.now() - start;
       console.log(`Received query response from in ${msResponseTime}`);
+  }
+});
+
+app.post("/embed", async (req, res) => {
+  if (!req.body.text) {
+      console.error(`Empty Text!`);
+      res.status(500).send('Empty Text!');
+
+  } else {
+      let response = null;
+      const start = Date.now();
+      try {
+          const { text } = req.body;
+          console.log(JSON.stringify(text));
+          const classifier = await MyClassificationPipeline.getInstance();
+          response = await classifier(text, {
+              pooling: 'mean',
+              normalize: true,
+          });
+          console.log(response);
+          res.send(response);
+      } catch (err) {
+          console.error(err.message);
+          res.status(500).send(err.message);
+      }
+    
+      const msResponseTime = Date.now() - start;
+      console.log(`Embedded text in ${msResponseTime}`);
   }
 });
 
