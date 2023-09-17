@@ -6,10 +6,16 @@ const axios = require('axios');
 const { expressjwt: jwt } = require("express-jwt"); // Validate JWT and set req.user
 const jwksRsa = require("jwks-rsa"); // Retrieve RSA keys from a JSON Web Key set (JWKS) endpoint
 const checkScope = require("express-jwt-authz"); // Validate JWT scopes
+const TurndownService = require('turndown');
+const pdf2md = require('@opendocsg/pdf2md');
+const multer = require('multer');
+const upload = multer();
 
 const { getSalesforceAuthToken, queryData } = require('./src/server/utils/SalesforceClient');
 
 require("dotenv").config();
+
+const turndownService = new TurndownService();
 
 const checkJwt = jwt({
   // Dynamically provide a signing key based on the kid in the header
@@ -85,6 +91,55 @@ app.post("/query", async (req, res) => {
     
       const msResponseTime = Date.now() - start;
       console.log(`Received query response from in ${msResponseTime}`);
+  }
+});
+
+app.post("/turndown", async (req, res) => {
+  if (!req.body.text) {
+      console.error(`Empty Text!`);
+      res.status(500).send('Empty Text!');
+  } else {
+      let response = null;
+      const start = Date.now();
+      try {
+          const { text } = req.body;
+
+          response = turndownService.turndown(text)
+          
+          console.log(response);
+          res.send(response);
+      } catch (err) {
+          console.error(err.message);
+          res.status(500).send(err.message);
+      }
+
+      const msResponseTime = Date.now() - start;
+      console.log(`Turndown text in ${msResponseTime}`);
+  }
+});
+
+app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
+  try {
+      // Check if data has been uploaded
+      // Check if a file has been uploaded
+      if (!req.file) {
+          return res.status(400).send('No file uploaded.');
+      }
+
+      // Access the uploaded file buffer
+      const pdfBuffer = req.file.buffer;
+
+      // Convert PDF to markdown
+      try {
+          const text = await pdf2md(pdfBuffer);
+          res.status(200).send(text);
+      } catch (err) {
+          console.error(err);
+          res.status(500).send(err.message);
+      }
+  } catch (err) {
+      console.error(err.message);
+      res.status(500).send(err.message);
   }
 });
 
