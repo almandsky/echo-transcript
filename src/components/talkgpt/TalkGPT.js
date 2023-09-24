@@ -55,7 +55,7 @@ function TalkGPT(props) {
     const [answering, setAnswering] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
-    const [model, setModel] = useState('text-davinci-003');
+    const [model, setModel] = useState('gpt-3.5-turbo-instruct');
 
     const [chatHistory, setChatHistory] = useState([]);
     const [displayChatHistory, setDisplayChatHistory] = useState([]);
@@ -511,6 +511,7 @@ function TalkGPT(props) {
                                         <MenuItem value="text-babbage-001">text-babbage-001</MenuItem>
                                         <MenuItem value="text-curie-001">text-curie-001</MenuItem>
                                         <MenuItem value="text-davinci-003">text-davinci-003</MenuItem>
+                                        <MenuItem value="gpt-3.5-turbo-instruct">gpt-3.5-turbo-instruct</MenuItem>
                                     </Select>
                                 </FormControl>
                             </FormControl>
