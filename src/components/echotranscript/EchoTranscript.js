@@ -7,13 +7,10 @@ import Card from '@mui/material/Card';
 import Checkbox from '@mui/material/Checkbox';
 import Container from '@mui/material/Container';
 
-import FastForward from "@mui/icons-material/FastForward";
-
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Grid from '@mui/material/Grid';
-import Pause from "@mui/icons-material/Pause";
 import Paper from "@mui/material/Paper";
 import Slider from '@mui/material/Slider';
 import Stack from "@mui/material/Stack";
@@ -50,7 +47,7 @@ function EchoTranscript() {
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [volume, setVolume] = useState(1);
-    const [delayTime, setDelayTime] = useState(0.5);
+    const [delayTime, setDelayTime] = useState(1);
     
 
     const startProcess = async () => {
@@ -260,15 +257,15 @@ function EchoTranscript() {
         try {
             context = new AudioContext();
             const source = context.createMediaStreamSource(stream);
-            const volumeValue = parseInt(volume, 10);
+            // const volumeValue = parseInt(volume, 10);
 
-            const gainNode = context.createGain();
-            gainNode.gain.setValueAtTime(volumeValue, context.currentTime);
+            // const gainNode = context.createGain();
+            // gainNode.gain.setValueAtTime(volumeValue, context.currentTime);
 
             const delayNode = context.createDelay();
             delayNode.delayTime.value = delayTime;
 
-            source.connect(delayNode).connect(gainNode).connect(context.destination);
+            source.connect(delayNode).connect(context.destination);
 
         } catch (err) {
             console.log(`playWithDelay error detected: ${err}`);
@@ -370,7 +367,7 @@ function EchoTranscript() {
                                         disabled={playing}
                                     />
                                     <Stack spacing={2} direction="row" alignItems="center">
-                                        <Pause sx={{ color: playing ? grey[500] : '' }} disabled={!playing} />
+                                        <Typography variant="caption">Delay:</Typography>
                                         <Slider
                                             aria-label="Delay"
                                             value={delayTime}
@@ -382,9 +379,8 @@ function EchoTranscript() {
                                             max={1}
                                             sx={{ minWidth: 50 }}
                                         />
-                                        <FastForward sx={{ color: playing ? grey[500] : '' }} disabled={!playing} />
                                     </Stack>
-                                    <Stack spacing={2} direction="row" alignItems="center">
+                                    {/* <Stack spacing={2} direction="row" alignItems="center">
                                         {
                                             volume ? (<VolumeDown sx={{ color: playing ? grey[500] : '' }} disabled={!playing} />) : (<VolumeOff sx={{ color: playing ? grey[500] : '' }} disabled={!playing} />)
                                         }
@@ -399,7 +395,7 @@ function EchoTranscript() {
                                             sx={{ minWidth: 50 }}
                                         />
                                         <VolumeUp sx={{ color: playing || !volume ? grey[500] : '' }} disabled={!playing} />
-                                    </Stack>
+                                    </Stack> */}
                                 </FormGroup>
                             </FormControl>
                         </Box>
