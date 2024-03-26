@@ -30,7 +30,7 @@ const Header = () => {
     return (
         <AuthContext.Consumer>
             {auth => (
-            <AppBar position="static">
+            <AppBar position="sticky">
                 <Toolbar>
                     <IconButton
                         size="large"

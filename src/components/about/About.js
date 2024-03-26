@@ -17,7 +17,7 @@ const AboutPage = () => (
             </Typography>
             <Typography variant="h5" component='h2' sx={{ m: 1 }}>Talk to yourself</Typography>
             <Typography component='p' sx={{ m: 1 }}>
-                The <Link href="https://skychen.com/">Echo Transcript</Link> page utilizes the the <Link href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API">Web Speech API</Link> to generate a voice-to-text transcript of your spoken words. You can also hear your own voice.
+                The <Link href="https://skychen.com/">Echo Scribe</Link> page utilizes the the <Link href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API">Web Speech API</Link> to generate a voice-to-text transcript of your spoken words. You can also hear your own voice.
             </Typography>
         </Paper>
     </Container>
