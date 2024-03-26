@@ -315,6 +315,16 @@ function EchoTranscript() {
         setVolume(newValue);
     };
 
+    const handlePTTStart = async () => {
+        await startProcess()
+    };
+
+    const handlePTTStop = async () => {
+        stopProcess()
+    };
+
+    handlePTTStart
+
     const handleNoiseCancelingChange = (event, newValue) => {
         setState({
             ...state,
@@ -333,7 +343,7 @@ function EchoTranscript() {
         <Container component="main" sx={{ mb: 4 }}>
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} sm={4} sx={{ display: 'grid', gap: 2 }} id="controls">
+                    <Grid item xs={12} sm={5} md={4} sx={{ display: 'grid', gap: 2 }} id="controls">
                         <Box sx={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -342,6 +352,19 @@ function EchoTranscript() {
                             <Button variant="contained" disabled={playing} onClick={handleStartClick}>Start</Button>
                             <Button variant="contained" disabled={!playing} onClick={handleStopClick}>Stop</Button>
                             <Button variant="contained" disabled={playing} onClick={handleResetClick}>Reset</Button>
+                        </Box>
+
+                        <Box align="center">
+                            <Button
+                                variant="contained"
+                                onMouseDown={handlePTTStart}
+                                onMouseUp={handlePTTStop}
+                                onTouchStart={handlePTTStart}
+                                onTouchEnd={handlePTTStop}
+                                disabled={playing}
+                            >
+                                Push to Talk
+                            </Button>
                         </Box>
 
                         <Box align="center">
@@ -400,7 +423,7 @@ function EchoTranscript() {
                             </FormControl>
                         </Box>
                     </Grid>
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} sm={7} md={8}>
                         <Typography variant="caption">You said:</Typography>
                         <Card raised sx={{
                             p: 2
