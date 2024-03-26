@@ -1,5 +1,5 @@
 const routes = {
-    '/': "Echo Transcript",
+    '/': "Echo Scribe",
     '/talkgpt': "Talk to chatGPT",
     '/workgpt': "Work with chatGPT",
     '/about': "About"

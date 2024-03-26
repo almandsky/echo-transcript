@@ -1,6 +1,6 @@
 {
-    "name": "Echo Transcript",
-    "short_name": "Echo Trans",
+    "name": "Echo Scribe",
+    "short_name": "EchoScribe",
     "start_url": "/",
     "display": "standalone",
     "icons": [

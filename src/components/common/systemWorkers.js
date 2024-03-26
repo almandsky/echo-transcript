@@ -5,7 +5,60 @@ const HUMAN_PREFIX = 'Human:';
 const AI_PREFIX = 'AI:';
 
 const AI_ENDPOINT = '/completions';
+const GROQ_AI_ENDPOINT = '/completions_groq';
 
+
+
+
+export const generateChatGroq = async ({
+    auth,
+    model,
+    currentWorkContext = '',
+    newPrompt,
+    additionalPrompt = '',
+    temperature,
+    callback = null
+}) => {
+
+    try {
+        const prompt = currentWorkContext
+        ? currentWorkContext + '\n\n' + newPrompt + additionalPrompt
+        : newPrompt + additionalPrompt;
+
+    const messages = [{
+        role: 'assistant',
+        content: prompt
+    }]
+    const response = await axios.post(GROQ_AI_ENDPOINT, {
+        // model: 'mixtral-8x7b-32768',
+        // model: 'llama2-70b-4096',
+        model: 'gemma-7b-it',
+        messages,
+        temperature,
+        max_tokens: 500,
+        // top_p: 1,
+        // frequency_penalty: 0.2,
+        // presence_penalty: 0.2,
+        // stop: [`${HUMAN_PREFIX}`, `${AI_PREFIX}`]
+    }, {
+        headers: {
+          'Authorization': `Bearer ${auth.getAccessToken()}` 
+        }
+    });
+
+    console.log('sky debug 3001 reponse is ', response);
+    const answerText = response.data;
+
+    if (callback) {
+        await callback(answerText);
+    }
+
+    return answerText;
+    } catch (err) {
+        console.error(err.message);
+        return `Failed API Call with error ${err.message}`;
+    }
+}
 
 
 export const generateChat = async ({

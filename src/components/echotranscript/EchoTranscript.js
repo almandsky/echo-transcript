@@ -53,7 +53,7 @@ function EchoTranscript() {
     const startProcess = async () => {
         window?.gtag('event', 'startecho', {
             'event_category': language,
-            'event_label': 'Start Echo Transcript'
+            'event_label': 'Start Echo Scribe'
         });
         if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
             let hasHeadphone = false;
@@ -217,7 +217,7 @@ function EchoTranscript() {
         setThinking(false);
         window?.gtag('event', 'stopecho', {
             'event_category': language,
-            'event_label': 'Stop Echo Transcript'
+            'event_label': 'Stop Echo Scribe'
         });
     };
 
@@ -316,14 +316,24 @@ function EchoTranscript() {
     };
 
     const handlePTTStart = async () => {
+        // console.log("sky debug 1001 handlePTTStart");
         await startProcess()
     };
 
     const handlePTTStop = async () => {
+        // console.log("sky debug 1002 handlePTTStop");
         stopProcess()
     };
 
-    handlePTTStart
+    const handlePTTTouchStart = async () => {
+        // console.log("sky debug 1003 handlePTTTouchStart");
+        await startProcess()
+    };
+
+    const handlePTTTouchStop = async () => {
+        // console.log("sky debug 1004 handlePTTTouchStop");
+        stopProcess()
+    };
 
     const handleNoiseCancelingChange = (event, newValue) => {
         setState({
@@ -354,18 +364,18 @@ function EchoTranscript() {
                             <Button variant="contained" disabled={playing} onClick={handleResetClick}>Reset</Button>
                         </Box>
 
-                        <Box align="center">
+                        {/* <Box align="center">
                             <Button
                                 variant="contained"
                                 onMouseDown={handlePTTStart}
                                 onMouseUp={handlePTTStop}
-                                onTouchStart={handlePTTStart}
-                                onTouchEnd={handlePTTStop}
+                                onTouchStart={handlePTTTouchStart}
+                                onTouchEnd={handlePTTTouchStop}
                                 disabled={playing}
                             >
                                 Push to Talk
                             </Button>
-                        </Box>
+                        </Box> */}
 
                         <Box align="center">
                             <FormControl component="fieldset" variant="standard" align='left'>
@@ -437,7 +447,7 @@ function EchoTranscript() {
                                 return true;
                             }
                             stopProcess();
-                            return ('The Echo Transcript is stop when you navigate to other page.');
+                            return ('The Echo Scribe is stop when you navigate to other page.');
                         }}
                     />
                 </Grid>

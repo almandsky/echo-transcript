@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Prompt } from 'react-router-dom';
 import PropTypes from "prop-types";
 
@@ -17,14 +17,16 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import LanguageSelect from '../common/LanguageSelect';
-import { generateChat } from '../common/systemWorkers';
+import { generateChat, generateChatGroq } from '../common/systemWorkers';
 
 import ChatHistory from "../ChatHistory/ChatHistory";
 
 import { typeMessage, truncateText } from '../common/utils';
+
 
 const HUMAN_PREFIX = 'Human:';
 
@@ -33,7 +35,15 @@ const OUTBOUND = 'OUTBOUND';
 
 const MAX_HISTORY = 10;
 
+const INIT_MESSAGE = {
+    user: 'chatGPT',
+    message: 'Hi!  How can I help you?',
+    type: INBOUND
+};
+
 function TalkGPT(props) {
+
+    const debug = true;
 
     const [state, setState] = useState({
         language: 'en-US',
@@ -48,11 +58,11 @@ function TalkGPT(props) {
     } = state;
 
     const [playing, setPlaying] = useState(false);
-    const [localStream, setStream] = useState(null);
     const [speechRecognition, setRecognition] = useState(null);
     const [synth, setSynth] = useState(null);
     const [thinking, setThinking] = useState(false);
     const [answering, setAnswering] = useState(false);
+    const [initialized, setInitialized] = useState(false);
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [model, setModel] = useState('gpt-3.5-turbo-instruct');
@@ -60,6 +70,8 @@ function TalkGPT(props) {
     const [chatHistory, setChatHistory] = useState([]);
     const [displayChatHistory, setDisplayChatHistory] = useState([]);
     const [userProfile, setUserProfile] = useState([]);
+
+    const [testMessage, setTestMessage] = useState('tell me a joke');
 
 
     const addChatHistory = ({ user, message, type}) => {
@@ -132,7 +144,7 @@ function TalkGPT(props) {
 
         setAnswering(true);
 
-        const answerText = await generateChat({
+        const answerText = await generateChatGroq({
             auth: props.auth,
             model,
             newPrompt,
@@ -149,7 +161,14 @@ function TalkGPT(props) {
         
         const textToDisplay = truncateText(answerText);
 
+        addChatHistory({
+            user: 'chatGPT',
+            message: textToDisplay,
+            type: INBOUND
+        });
+
         setAnswering(false);
+
         typeMessage(answerDiv, textToDisplay, () => {
             answerDiv.scrollTop = answerDiv.scrollHeight;
             transcriptDiv.innerHTML = '';
@@ -157,11 +176,7 @@ function TalkGPT(props) {
             
         });
 
-        addChatHistory({
-            user: 'chatGPT',
-            message: textToDisplay,
-            type: INBOUND
-        });
+        
 
         speakMessage(textToDisplay, true);
 
@@ -172,136 +187,110 @@ function TalkGPT(props) {
             'event_category': language,
             'event_label': 'Start Talk to chatGPT'
         });
-        if (window.navigator.mediaDevices && window.navigator.mediaDevices.getUserMedia) {
-            let hasHeadphone = false;
-            navigator.mediaDevices.enumerateDevices()
-                .then((devices) => {
-                    devices.forEach((device) => {
-                        if (device.kind === 'audiooutput' && device.label && device.label.toLowerCase().includes('headphone')) {
-                            console.log('Headphone detected!');
-                            hasHeadphone = true;
-                        }
-                    });
-                })
-                .catch((err) => {
-                    console.error(`${err.name}: ${err.message}`);
-                });
-            window.navigator.mediaDevices.getUserMedia({
-                audio: {
-                    noiseSuppression: noiseCanceling,
-                    autoGainControl: autoGainControl,
-                    echoCancellation: !hasHeadphone,
-                    sampleRate: 192000,
-                    sampleSize: 24
-                },
-            }).then(stream => {
-                setStream(stream);
-                if (speechRecognition) {
-                    speechRecognition.mediaStream = stream;
-                }
-                // playWithDelay(stream);
-            })
-                .catch(error => {
-                    console.error(error);
-                });
-        }
+        
 
         if (speechRecognition) {
-            speechRecognition.onresult = (event) => {
-                const transcriptDiv = document.querySelector('#transcript-div');
-                const answerDiv = document.querySelector('#answer-div');
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const result = event.results[i];
-                    if (result.isFinal) {
-                        let message = result[0].transcript.trim();
+            if (!initialized) {
+                speechRecognition.onresult = (event) => {
+                    const transcriptDiv = document.querySelector('#transcript-div');
+                    const answerDiv = document.querySelector('#answer-div');
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const result = event.results[i];
+                        if (result.isFinal) {
+                            let message = result[0].transcript.trim();
 
-                        if (message.toLowerCase() === 'break' || message.toLowerCase() === 'line break' || message.toLowerCase() === 'next line') {
-                            message = '\n';
-                        } else if (message.toLowerCase() === 'stop') {
-                            message = '';
-                            setPlaying(false);
-                        } else if (message.toLowerCase() === 'reset') {
-                            message = '';
-                            transcriptDiv.innerHTML = '';
+                            if (message.toLowerCase() === 'break' || message.toLowerCase() === 'line break' || message.toLowerCase() === 'next line') {
+                                message = '\n';
+                            } else if (message.toLowerCase() === 'stop') {
+                                message = '';
+                                setPlaying(false);
+                            } else if (message.toLowerCase() === 'reset') {
+                                message = '';
+                                transcriptDiv.innerHTML = '';
+                            } else {
+                                message += '. ';
+                            }
+
+                            setThinking(false);
+                            const historyMessage = HUMAN_PREFIX + '\n\n' + message;
+                            setChatHistory([
+                                ...chatHistory,
+                                historyMessage
+                            ])
+                            addChatHistory({
+                                user: userProfile.nickname,
+                                message,
+                                type: OUTBOUND
+                            })
+                            typeMessage(transcriptDiv, message, async () => {
+                                transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+                                answerDiv.innerHTML = '';
+                                await processAnswer();
+                            });
                         } else {
-                            message += '. ';
+                            setThinking(true);
                         }
+                    }
+                };
+                
 
-                        setThinking(false);
-                        const historyMessage = HUMAN_PREFIX + '\n\n' + message;
-                        setChatHistory([
-                            ...chatHistory,
-                            historyMessage
-                        ])
-                        addChatHistory({
-                            user: userProfile.nickname,
-                            message,
-                            type: OUTBOUND
-                        })
-                        typeMessage(transcriptDiv, message, async () => {
-                            transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
-                            answerDiv.innerHTML = '';
-                            await processAnswer();
-                        });
-                    } else {
-                        setThinking(true);
+                speechRecognition.onerror = (event) => {
+                    console.log(`Speech recognition error detected: ${event.error}`);
+                    console.log(`Additional information: ${event.message}`);
+                    console.log(`event information: ${JSON.stringify(event)}`);
+                    // try to restart
+                    if (event.error === 'network') {
+                        speechRecognition.stop();
+                        speechRecognition.start();
                     }
                 }
-            };
+
+                // log other events
+
+                speechRecognition.onaudiostart = (event) => {
+                    console.log(`onaudiostart: ${JSON.stringify(event)}`);
+                }
+
+                speechRecognition.onaudioend = (event) => {
+                    console.log(`onaudioend: ${JSON.stringify(event)}`);
+                }
+
+                speechRecognition.onend = (event) => {
+                    console.log(`onend: ${JSON.stringify(event)}`);
+                    if (playing && !synth.speaking) {
+                        speechRecognition.stop();
+                        speechRecognition.start();
+                    }
+                }
+
+                speechRecognition.onnomatch = (event) => {
+                    console.log(`onnomatch: ${JSON.stringify(event)}`);
+                }
+
+                speechRecognition.onsoundstart = (event) => {
+                    console.log(`onsoundstart: ${JSON.stringify(event)}`);
+                }
+
+                speechRecognition.onsoundend = (event) => {
+                    console.log(`onsoundend: ${JSON.stringify(event)}`);
+                }
+
+                speechRecognition.onspeechstart = (event) => {
+                    console.log(`onspeechstart: ${JSON.stringify(event)}`);
+                }
+
+                speechRecognition.onspeechend = (event) => {
+                    console.log(`onspeechend: ${JSON.stringify(event)}`);
+                }
+
+                speechRecognition.onstart = (event) => {
+                    console.log(`onstart: ${JSON.stringify(event)}`);
+                }
+
+                // setInitialized(true);
+            }
+
             speechRecognition.start();
-
-            speechRecognition.onerror = (event) => {
-                console.log(`Speech recognition error detected: ${event.error}`);
-                console.log(`Additional information: ${event.message}`);
-                console.log(`event information: ${JSON.stringify(event)}`);
-                // try to restart
-                if (event.error === 'network') {
-                    speechRecognition.stop();
-                    speechRecognition.start();
-                }
-            }
-
-            // log other events
-
-            speechRecognition.onaudiostart = (event) => {
-                console.log(`onaudiostart: ${JSON.stringify(event)}`);
-            }
-
-            speechRecognition.onaudioend = (event) => {
-                console.log(`onaudioend: ${JSON.stringify(event)}`);
-            }
-
-            speechRecognition.onend = (event) => {
-                console.log(`onend: ${JSON.stringify(event)}`);
-                if (playing && !synth.speaking) {
-                    speechRecognition.stop();
-                    speechRecognition.start();
-                }
-            }
-
-            speechRecognition.onnomatch = (event) => {
-                console.log(`onnomatch: ${JSON.stringify(event)}`);
-            }
-
-            speechRecognition.onsoundstart = (event) => {
-                console.log(`onsoundstart: ${JSON.stringify(event)}`);
-            }
-
-            speechRecognition.onsoundend = (event) => {
-                console.log(`onsoundend: ${JSON.stringify(event)}`);
-            }
-
-            speechRecognition.onspeechstart = (event) => {
-                console.log(`onspeechstart: ${JSON.stringify(event)}`);
-            }
-
-            speechRecognition.onspeechend = (event) => {
-                console.log(`onspeechend: ${JSON.stringify(event)}`);
-            }
-
-            speechRecognition.onstart = (event) => {
-                console.log(`onstart: ${JSON.stringify(event)}`);
-            }
 
             if (wakeLockSupported) {
                 // Listen for wake lock release
@@ -335,13 +324,6 @@ function TalkGPT(props) {
         if (synth) {
             synth.cancel()
         }
-
-        localStream && localStream.getAudioTracks().forEach((audioTrack) => {
-            if (audioTrack) {
-                audioTrack.stop();
-            }
-        });
-
 
         if (wakeLockSupported && wakeLock) {
             wakeLock.release()
@@ -456,11 +438,41 @@ function TalkGPT(props) {
         });
     };
 
+    const handleTestMessageChange = (event) => {
+        setTestMessage(event.target.value);
+    };
+
+    const handleRestRequestClick = async () => {
+        const transcriptDiv = document.querySelector('#transcript-div');
+        const answerDiv = document.querySelector('#answer-div');
+        answerDiv.innerHTML = '';
+        transcriptDiv.innerHTML = testMessage;
+        await processAnswer();
+
+        if (speechRecognition) {
+            speechRecognition.stop();
+        }
+    }
+
 
     return (
         <Container component="main" sx={{ mb: 4 }}>
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
-                <Grid container spacing={3}>
+                <ChatHistory history={displayChatHistory} />
+                { (debug) && <Grid item xs={12} sm={12}>
+                        <TextField
+                            id="test-message-input"
+                            label="Test Message"
+                            variant="outlined"
+                            multiline
+                            sx={{ width: '100%' }}
+                            rows={2}
+                            value={testMessage}
+                            onChange={handleTestMessageChange}
+                        />
+                        <Button onClick={handleRestRequestClick}>Test request</Button>
+                    </Grid>}
+                <Grid container spacing={3} sx={{ marginTop: '1rem' }}>
                     <Grid item xs={12} sm={4} sx={{ display: 'grid', gap: 2 }} id="controls">
                         <Box sx={{
                             display: 'grid',
@@ -526,7 +538,7 @@ function TalkGPT(props) {
                         <Card raised sx={{ p: 1, bgcolor: '#defcfc', marginBottom: '1rem' }}><pre id="answer-div" className={answering ? 'thinking' : ''}></pre></Card>
                     </Grid>
                 </Grid>
-                <ChatHistory history={displayChatHistory} />
+                
                 <Prompt
                         when={playing}
                         // message="Are you sure you want to leave this page? Your microphone is still being used."
