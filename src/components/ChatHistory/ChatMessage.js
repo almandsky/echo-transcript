@@ -18,8 +18,8 @@ const ChatMessage = ({ message, type, createdDate, user }) => {
                 variant={'outlined'}
                 className={type === OUTBOUND ? 'outbound' : 'inbound'}
                 sx={{
-                    maxWidth: '300px',
-                    // width: 'fit-content'
+                    maxWidth: '80%',
+                    width: 'fit-content',
                     borderRadius: type === OUTBOUND ? '0.5rem 0.5rem 0' : '0.5rem 0.5rem 0.5rem 0',
                     backgroundColor: type === OUTBOUND ? '#1976D2' : '#f3f3f3',
                     color: type === OUTBOUND ? 'white' : 'black',
