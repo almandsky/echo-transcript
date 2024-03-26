@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Prompt } from 'react-router-dom';
 import PropTypes from "prop-types";
+import { v4 as uuidv4 } from 'uuid';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -78,7 +79,7 @@ function TalkGPT(props) {
         const currentTime = new Date();
 
         const newMessage = {
-            id: currentTime,
+            id: uuidv4(),
             user,
             message,
             type,
@@ -447,6 +448,14 @@ function TalkGPT(props) {
         const answerDiv = document.querySelector('#answer-div');
         answerDiv.innerHTML = '';
         transcriptDiv.innerHTML = testMessage;
+
+
+        addChatHistory({
+            user: userProfile.nickname,
+            message: testMessage,
+            type: OUTBOUND
+        });
+
         await processAnswer();
 
         if (speechRecognition) {
@@ -459,7 +468,7 @@ function TalkGPT(props) {
         <Container component="main" sx={{ mb: 4 }}>
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
                 <ChatHistory history={displayChatHistory} />
-                { (debug) && <Grid item xs={12} sm={12}>
+                { (debug) && <Grid item xs={12} sm={12} sx={{ marginTop: '1rem' }}>
                         <TextField
                             id="test-message-input"
                             label="Test Message"
@@ -470,7 +479,7 @@ function TalkGPT(props) {
                             value={testMessage}
                             onChange={handleTestMessageChange}
                         />
-                        <Button onClick={handleRestRequestClick}>Test request</Button>
+                        <Button sx={{ marginTop: '0.5rem' }}onClick={handleRestRequestClick} variant="contained">Test request</Button>
                     </Grid>}
                 <Grid container spacing={3} sx={{ marginTop: '1rem' }}>
                     <Grid item xs={12} sm={4} sx={{ display: 'grid', gap: 2 }} id="controls">

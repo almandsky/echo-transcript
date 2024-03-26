@@ -9,11 +9,11 @@ import ChatMessage from './ChatMessage';
 const ChatHistory = ({ history }) => {
 
     return (
-        history && history.length > 0 && 
+        // history && history.length > 0 && 
         
         <Box>
             <Typography variant="overline" sx={{ marginLeft: '1rem', backgroundColor: 'white', p: 0.5 }}>Chat History</Typography>
-            <Grid item xs={12} sm={12} sx={{ border: 1, borderColor: 'rgba(0, 0, 0, 0.12)', borderRadius: 1, p: 1, marginTop: '-1rem' }}>
+            <Grid item xs={12} sm={12} sx={{ border: 1, borderColor: 'rgba(0, 0, 0, 0.12)', borderRadius: 1, p: 1, marginTop: '-1rem', minHeight: 100 }}>
                 { history.map((chat) => {
                     return <ChatMessage
                                 key={chat.id}
