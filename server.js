@@ -37,7 +37,8 @@ const checkJwt = jwt({
 });
 
 const {
-  OPENAI_API_KEY
+  OPENAI_API_KEY,
+  GROQ_API_KEY
 } = process.env;
 
 const app = express();
@@ -51,6 +52,26 @@ app.use((req, res, next) => {
   console.log(`${dateTime} ${req.method} ${req.originalUrl} ${res.statusCode} ${res.statusMessage || ''}`);
   next();
 });
+
+app.post("/completions_groq", checkJwt, checkScope(["read:completions"], { customScopeKey: 'permissions', customUserKey: 'auth' }), async (req, res) => {
+  try {
+      const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', req.body, {
+          headers: {
+              'Authorization': `Bearer ${GROQ_API_KEY}`,
+          },
+      });
+
+      console.log(response.data.choices[0]);
+
+      const responseData = response.data.choices[0].message.content;
+      res.send(responseData);
+  } catch (err) {
+      // Handle errors
+      console.error(err.message);
+      res.status(500).send(err.message);
+  }
+});
+
 
 app.post("/completions", checkJwt, checkScope(["read:completions"], { customScopeKey: 'permissions', customUserKey: 'auth' }), async (req, res) => {
   try {
