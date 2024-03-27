@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
+import Markdown from "markdown-to-jsx";
 
 const OUTBOUND = 'OUTBOUND';
 
@@ -24,7 +25,11 @@ const ChatMessage = ({ message, type, createdDate, user }) => {
                     backgroundColor: type === OUTBOUND ? '#1976D2' : '#f3f3f3',
                     color: type === OUTBOUND ? 'white' : 'black',
                 }}>
-                <Box sx={{ p: '0.5rem' }}>{message}</Box>
+                <Box sx={{ p: '0.5rem' }}>
+                    <Markdown>
+                        {message}
+                    </Markdown>
+                </Box>
             </Card>
             <Typography variant="caption" sx={{ marginLeft: '0.5rem', marginTop: '0.125rem' }}>{user} • {createdDate}</Typography>
         </Box>
