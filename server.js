@@ -61,8 +61,6 @@ app.post("/completions_groq", checkJwt, checkScope(["read:completions"], { custo
           },
       });
 
-      console.log(response.data.choices[0]);
-
       const responseData = response.data.choices[0].message.content;
       res.send(responseData);
   } catch (err) {
