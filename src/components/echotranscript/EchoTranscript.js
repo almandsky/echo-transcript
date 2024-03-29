@@ -5,12 +5,16 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Checkbox from '@mui/material/Checkbox';
+
 import Container from '@mui/material/Container';
 
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
 import Paper from "@mui/material/Paper";
 import Slider from '@mui/material/Slider';
 import Stack from "@mui/material/Stack";
@@ -21,10 +25,15 @@ import VolumeDown from "@mui/icons-material/VolumeDown";
 import VolumeOff from "@mui/icons-material/VolumeOff";
 import VolumeUp from "@mui/icons-material/VolumeUp";
 
+
+
+
+
 import { grey } from '@mui/material/colors';
 
 import LanguageSelect from "../common/LanguageSelect";
 import { typeMessage } from '../common/utils';
+
 
 function EchoTranscript() {
     const [state, setState] = useState({
@@ -293,6 +302,8 @@ function EchoTranscript() {
 
     const handleStopClick = () => {
         setPlaying(false);
+        const transcriptDiv = document.querySelector('#transcript-div');
+        transcriptDiv.innerHTML = '';
     };
 
     const handleResetClick = () => {
@@ -353,15 +364,18 @@ function EchoTranscript() {
         <Container component="main" sx={{ mb: 4 }}>
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} sm={5} md={4} sx={{ display: 'grid', gap: 2 }} id="controls">
+                    <Grid item xs={12} sm={6} md={4} sx={{ display: 'grid', gap: 2 }} id="controls">
                         <Box sx={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(3, 1fr)',
+                            gridTemplateColumns: 'repeat(2, 1fr)',
                             gap: 1
                         }} align="center">
-                            <Button variant="contained" disabled={playing} onClick={handleStartClick}>Start</Button>
-                            <Button variant="contained" disabled={!playing} onClick={handleStopClick}>Stop</Button>
-                            <Button variant="contained" disabled={playing} onClick={handleResetClick}>Reset</Button>
+                            {/* <Button variant="contained" disabled={playing} onClick={handleStartClick}>Start</Button>
+                            <Button variant="contained" disabled={!playing} onClick={handleStopClick}>Stop</Button> */}
+                            
+                            <Button variant="contained" sx={{ borderRadius: '20px' }}disabled={playing} onClick={handleStartClick} endIcon={<MicIcon />}>Activate</Button>
+                            <Button variant="contained" sx={{ borderRadius: '20px' }} disabled={!playing} onClick={handleStopClick} endIcon={<MicOffIcon />}>Deactivate</Button>
+                            {/* <Button variant="contained" disabled={playing} onClick={handleResetClick}>Reset</Button> */}
                         </Box>
 
                         {/* <Box align="center">
@@ -400,7 +414,7 @@ function EchoTranscript() {
                                         disabled={playing}
                                     />
                                     <Stack spacing={2} direction="row" alignItems="center">
-                                        <Typography variant="caption">Delay:</Typography>
+                                        <Typography variant="caption">Echo&nbsp;Delay:</Typography>
                                         <Slider
                                             aria-label="Delay"
                                             value={delayTime}
@@ -433,7 +447,7 @@ function EchoTranscript() {
                             </FormControl>
                         </Box>
                     </Grid>
-                    <Grid item xs={12} sm={7} md={8}>
+                    <Grid item xs={12} sm={6} md={8}>
                         <Typography variant="caption">You said:</Typography>
                         <Card raised sx={{
                             p: 2
@@ -450,6 +464,25 @@ function EchoTranscript() {
                             return ('The Echo Scribe is stop when you navigate to other page.');
                         }}
                     />
+                </Grid>
+                
+            </Paper>
+            <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} sx={{ display: 'grid', gap: 2 }} id="Description">
+                        {/* <p><b>Perfect Your Pronunciation</b>: Echo Scribe is your personal pronunciation coach. Speak, listen back, and refine your speech until it's perfect. Master pronunciation in 27 languages, seamlessly.</p>
+                        <p><b>Hear It, Speak It, Master It</b>: With Echo Scribe, improvement is just a playback away. Practice your pronunciation anytime, anywhere, and hear the difference immediately.</p>
+                        <p><a href="https://assistant.life-hacks.app/" class="button" target="_blank" rel="noopener noreferrer" alt="Improve your Pronunciation">Try Echo Scribe</a></p> */}
+                        <Typography component='p' sx={{ m: 1 }}>
+                            <b>Perfect Your Pronunciation</b>: Echo Scribe Echo Scribe is your personal pronunciation coach. Speak, listen back, and refine your speech until it&apos;s perfect. Master pronunciation in 37 languages, seamlessly.
+                        </Typography>
+                        <Typography component='p' sx={{ m: 1 }}>
+                            <b>Hear It, Speak It, Master It</b>: With Echo Scribe, improvement is just a playback away. Practice your pronunciation anytime, anywhere, and hear the difference immediately.
+                        </Typography>
+                        <Typography component='p' sx={{ m: 1 }}>
+                            Your feedback is valuable, please contact <Link href="mailto:support@life-hacks.app">support@life-hacks.app</Link>.
+                        </Typography>
+                    </Grid>
                 </Grid>
             </Paper>
         </Container>
