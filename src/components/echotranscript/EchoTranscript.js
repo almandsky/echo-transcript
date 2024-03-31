@@ -373,7 +373,7 @@ function EchoTranscript() {
                             {/* <Button variant="contained" disabled={playing} onClick={handleStartClick}>Start</Button>
                             <Button variant="contained" disabled={!playing} onClick={handleStopClick}>Stop</Button> */}
                             
-                            <Button variant="contained" sx={{ borderRadius: '20px' }}disabled={playing} onClick={handleStartClick} endIcon={<MicIcon />}>Activate</Button>
+                            <Button variant="contained" sx={{ borderRadius: '20px' }} disabled={playing} onClick={handleStartClick} endIcon={<MicIcon />}>Activate</Button>
                             <Button variant="contained" sx={{ borderRadius: '20px' }} disabled={!playing} onClick={handleStopClick} endIcon={<MicOffIcon />}>Deactivate</Button>
                             {/* <Button variant="contained" disabled={playing} onClick={handleResetClick}>Reset</Button> */}
                         </Box>
@@ -470,11 +470,11 @@ function EchoTranscript() {
             <Paper variant="outlined" sx={{ my: { xs: 2, md: 6 }, p: { xs: 2, md: 3 } }}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} sx={{ display: 'grid', gap: 2 }} id="Description">
-                        {/* <p><b>Perfect Your Pronunciation</b>: Echo Scribe is your personal pronunciation coach. Speak, listen back, and refine your speech until it's perfect. Master pronunciation in 27 languages, seamlessly.</p>
-                        <p><b>Hear It, Speak It, Master It</b>: With Echo Scribe, improvement is just a playback away. Practice your pronunciation anytime, anywhere, and hear the difference immediately.</p>
-                        <p><a href="https://assistant.life-hacks.app/" class="button" target="_blank" rel="noopener noreferrer" alt="Improve your Pronunciation">Try Echo Scribe</a></p> */}
                         <Typography component='p' sx={{ m: 1 }}>
-                            <b>Perfect Your Pronunciation</b>: Echo Scribe Echo Scribe is your personal pronunciation coach. Speak, listen back, and refine your speech until it&apos;s perfect. Master pronunciation in 37 languages, seamlessly.
+                            <b>All Data in local</b>: Echo Scribe work 100% off-line. This is a PWA (<Link href="https://web.dev/progressive-web-apps/">Progressive Web App</Link>) that can work without network connect.  That means no data is sent to the server.
+                        </Typography>
+                        <Typography component='p' sx={{ m: 1 }}>
+                            <b>Perfect Your Pronunciation</b>: Echo Scribe is your personal pronunciation coach. Speak, listen back, and refine your speech until it&apos;s perfect. Master pronunciation in 37 languages, seamlessly.
                         </Typography>
                         <Typography component='p' sx={{ m: 1 }}>
                             <b>Hear It, Speak It, Master It</b>: With Echo Scribe, improvement is just a playback away. Practice your pronunciation anytime, anywhere, and hear the difference immediately.
