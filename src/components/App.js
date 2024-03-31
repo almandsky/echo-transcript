@@ -11,6 +11,8 @@ import WorkGPT from './workgpt/WorkGPT';
 import AboutPage from './about/About';
 import PageNotFound from './PageNotFound';
 import Loading from './Loading';
+import Mentor from './mentor/Mentor';
+import Now from './now/Now';
 
 import Auth from "./Auth/Auth";
 import Callback from "./Auth/Callback";
@@ -82,6 +84,8 @@ function App(props) {
         <Header tokenRenewalComplete={tokenRenewalComplete} />
         <Switch>
           <Route exact path="/" component={EchoTranscript} />
+          <Route exact path="/mentor" component={Mentor} />
+          <Route exact path="/now" component={Now} />
           {tokenRenewalComplete ? <Route
             path="/callback"
             render={props => <Callback auth={auth} {...props} />}

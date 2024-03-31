@@ -46,7 +46,6 @@ export const generateChatGroq = async ({
         }
     });
 
-    console.log('sky debug 3001 reponse is ', response);
     const answerText = response.data;
 
     if (callback) {
