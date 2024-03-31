@@ -2,4 +2,4 @@ User-agent: *
 Disallow: */tags/
 Disallow: */categories/
 
-sitemap: https://skychen.com/sitemap.xml
+sitemap: https://ai.life-hacks.app/sitemap.xml
