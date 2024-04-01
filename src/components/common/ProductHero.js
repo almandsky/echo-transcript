@@ -60,7 +60,8 @@ export default function ProductHero(props) {
         component="a"
         href={buttonUrl}
         target="_blank"
-        sx={{ minWidth: 200 }}
+        disableRipple
+        sx={{ minWidth: 200, borderRadius: '40px', textTransform: 'none' }}
       >
         {buttonText}
       </Button>

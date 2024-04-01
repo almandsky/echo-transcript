@@ -41,12 +41,12 @@ const Mentor = () => (
         <ProductHero
             title="Mentor Notes"
             subtitle="Guided by AI, personalized mentorship for your success."
-            buttonText="Chat with Mentor Notes"
+            buttonText="Chat with 'Mentor Notes' GPT"
             buttonColor="primary"
             backgroundImage="images/mentor-notes-hero.jpg"
             backgroundColor="#5c6bc0"
             buttonUrl="https://chat.openai.com/g/g-CgllffGPG-mentor-notes"
-            footerText="ChatGPT Plus Required"
+            footerText="ChatGPT Plus Required.  Web version coming soon."
         />
 
         <ProductValues
@@ -150,29 +150,41 @@ const Mentor = () => (
 
         </Grid> */}
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <Button 
-                variant="contained"
-                component="a"
-                href="https://chat.openai.com/g/g-CgllffGPG-mentor-notes"
-                target="_blank"
-                color="primary"
-                sx={{ borderRadius: '20px' }}
-                // size="large"
-            >
-                Chat with Mentor Notes
-            </Button>
-        </Box>
+        <Grid container direction="row-reverse" spacing={2} alignItems="center" justifyContent="center">
+            <Grid item xs={12} sm={6} md={8}>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <ImageCard
+                        alt="Mentor Notes on desktop and mobile"
+                        src="images/mentor-notes-device.png"
+                    />
+                </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button 
+                        variant="contained"
+                        component="a"
+                        href="https://chat.openai.com/g/g-CgllffGPG-mentor-notes"
+                        target="_blank"
+                        color="primary"
+                        sx={{ borderRadius: '20px', textTransform: 'none' }}
+                        // size="large"
+                    >
+                        Chat with &apos;Mentor Notes&apos; GPT
+                    </Button>
+                </Box>
 
-        <Box sx={{ my: 4 }}>
-            <Typography variant="body2" color="text.secondary" align="center">
-            Your feedback is valuable, please contact <Link href="mailto:support@life-hacks.app">support@life-hacks.app</Link>.
-            </Typography>
-            {/* <Typography variant="h6" component='h2' sx={{ m: 1 }}>Contact Us</Typography>
-            <Typography component='p' sx={{ m: 1 }}>
-                Your feedback is valuable, please contact <Link href="mailto:support@life-hacks.app">support@life-hacks.app</Link>.
-            </Typography> */}
-        </Box>
+                <Box sx={{ my: 4 }}>
+                    <Typography variant="body2" color="text.secondary" align="center">
+                    Your feedback is valuable, please contact <Link href="mailto:support@life-hacks.app">support@life-hacks.app</Link>.
+                    </Typography>
+                    {/* <Typography variant="h6" component='h2' sx={{ m: 1 }}>Contact Us</Typography>
+                    <Typography component='p' sx={{ m: 1 }}>
+                        Your feedback is valuable, please contact <Link href="mailto:support@life-hacks.app">support@life-hacks.app</Link>.
+                    </Typography> */}
+                </Box>
+            </Grid>
+        </Grid>
 
     </Container>
 );
