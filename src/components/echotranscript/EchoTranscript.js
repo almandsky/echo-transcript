@@ -56,7 +56,7 @@ function EchoTranscript() {
     const [wakeLock, setWakeLock] = useState(null);
     const [wakeLockSupported, setWakeLockSupported] = useState(null);
     const [volume, setVolume] = useState(1);
-    const [delayTime, setDelayTime] = useState(1);
+    const [delayTime, setDelayTime] = useState(0.1);
     
 
     const startProcess = async () => {
