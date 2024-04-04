@@ -13,7 +13,7 @@ const AboutPage = () => (
             </Typography> */}
             <Typography variant="h6" component='h2' sx={{ m: 1 }}>Perfect Your Pronunciation</Typography>
             <Typography component='p' sx={{ m: 1 }}>
-                The <Link href="/">Echo Scribe</Link> Echo Scribe is your personal pronunciation coach. Speak, listen back, and refine your speech until it&apos;s perfect. Master pronunciation in 37 languages, seamlessly.
+                The <Link href="/">Echo Scribe</Link> is your personal pronunciation coach. Speak, listen back, and refine your speech until it&apos;s perfect. Master pronunciation in 37 languages, seamlessly.
             </Typography>
             {/* <Typography variant="h6" component='h2' sx={{ m: 1 }}>Talk to LLM</Typography>
             <Typography component='p' sx={{ m: 1 }}>
